@@ -1,0 +1,11 @@
+#pragma once
+#include <iostream>
+#include <string>
+using namespace std;
+struct Token
+{
+	string type;//DIVIDER KEYWORD IDENTIFIER CONSTANT типы токенов
+	string value;//значения токенов
+	int pos;//строка на которой расположен токен
+	//int pos[2];
+};

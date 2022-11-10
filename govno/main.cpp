@@ -1,6 +1,7 @@
 #include "ProgramReader.h"
 #include "DividerReader.h"
 #include "KeywordReader.h"
+#include "Parser.h"
 
 int main()
 {
@@ -14,6 +15,10 @@ int main()
 	DividerReader(dividersFileName);
 	std::cout << std::endl << std::endl << "====Keywords====" << std::endl << std::endl;
 	KeywordReader(keywordsFileName);
-	
+
+	Parser p;
+	p.Parser_prog(ProgramReader(programFileName), DividerReader(dividersFileName), KeywordReader(keywordsFileName));
+	std::cout << std::endl << std::endl << "====Tokens====" << std::endl << std::endl;
+	p.Write();
 	return 0;
 }

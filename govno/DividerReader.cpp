@@ -4,7 +4,7 @@ std::set<std::string> DividerReader(const char* dividersFileName)
 {
 	std::ifstream dividersFile; // файл с разделителями
 	std::string str; // строка для считывания из файла
-	std::set<std::string> dividersSet; // сет разделителей
+	std::set<std::string> dividersSet; // сет разделителей 
  	
 	dividersFile.open(dividersFileName);
 	
