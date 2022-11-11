@@ -11,4 +11,5 @@ public:
 	void Parser_prog(string, set<string>, set<string>);//сам парсер
 	void Write();//вывод токенов
 	vector<Token> token;//вектор токенов
+	bool Is_digit(string);
 };
