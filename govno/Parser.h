@@ -12,4 +12,11 @@ public:
 	void Write();//вывод токенов
 	vector<Token> token;//вектор токенов
 	bool Is_digit(string);
+	bool Is_digit(char);
+	vector<Token> tab_id;
+	vector<Token> tab_co;
+	void Set_id(Token);
+	void Set_co(Token);
+	void Push_back(string, string, int, int);
+	bool Find_Error(Token);
 };

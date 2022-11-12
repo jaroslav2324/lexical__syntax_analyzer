@@ -1,5 +1,5 @@
 main() {
-integer x;
+integer 1x;
 string z;
 z="www";
 bool y;
