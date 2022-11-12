@@ -7,14 +7,31 @@ void Parser::Parser_prog(string prog_text, set<string> dividers, set<string> key
 	string lexem;	// слово лексема: кейворд, идентификатор, константа 
 	int n_str = 1;	// счетчик номера строки
 	int n_lex = 1;
-	bool flag_const = false;
-	bool flag_id = false;
+	bool flag_const = false;//флаг константы  
+	bool flag_id = false;//флаг идентификатора 
+	bool flag_comm = false;//флаг комментариев 
 
 	int i = 0;	// счетчик символов
 	while (symb[0] != '\0') {
-		symb = prog_text[i];
+		symb = prog_text[i];/**/
 
-		if (dividers.find(lexem) != dividers.end() || dividers.find(symb) != dividers.end() || symb[0] == '\n' || symb == " ") {	// делается проверка на разделитель
+		//_____________ снятие статуса комментария
+		if (symb[0] == '\n' && lexem[0] == '/' && lexem[1] == '/') {
+			flag_comm = false;
+			symb = prog_text[i + 1];
+			lexem = "";
+			i++;
+		}
+
+		if (symb[0] == '*' && prog_text[i + 1] == '/' && lexem[0] == '/' && lexem[1] == '*') {
+			flag_comm = false;
+			symb = prog_text[i + 2];
+			lexem = "";
+			i++;
+		}
+		//_____________
+
+		if ((dividers.find(lexem) != dividers.end() || dividers.find(symb) != dividers.end() || symb[0] == '\n' || symb == " ") && !flag_comm) {	// делается проверка на разделитель
 			flag_id = true;
 
 			// Проверка на "двойной" divider когда == += <= и тд
@@ -26,7 +43,6 @@ void Parser::Parser_prog(string prog_text, set<string> dividers, set<string> key
 				i+=2;
 				continue;
 			}
-
 			// проверка на divider
 
 			if (dividers.find(lexem) != dividers.end() && !flag_const) {
@@ -82,6 +98,12 @@ void Parser::Parser_prog(string prog_text, set<string> dividers, set<string> key
 		}
 		else 
 			lexem += symb;
+
+		//_________Наложение статуса комментария
+		if (symb == "/" && (prog_text[i + 1] == '*' || prog_text[i + 1] == '/')) {
+			flag_comm = true;
+		}
+		//_________
 
 		if (symb[0] == '\n') {
 			n_str++;	// проверка на новую строку
