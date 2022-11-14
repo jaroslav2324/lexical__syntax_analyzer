@@ -11,9 +11,12 @@ void Parser::Parser_prog(string prog_text, set<string> dividers, set<string> key
 	bool flag_id = false;//флаг идентификатора 
 	bool flag_comm = false;//флаг комментариев 
 
+	/**/
+
+
 	int i = 0;	// счетчик символов
 	while (symb[0] != '\0') {
-		symb = prog_text[i];/**/
+		symb = prog_text[i];
 
 		//_____________ снятие статуса комментария
 		if (symb[0] == '\n' && lexem[0] == '/' && lexem[1] == '/') {
@@ -31,7 +34,7 @@ void Parser::Parser_prog(string prog_text, set<string> dividers, set<string> key
 		}
 		//_____________
 
-		if ((dividers.find(lexem) != dividers.end() || dividers.find(symb) != dividers.end() || symb[0] == '\n' || symb == " ") && !flag_comm) {	// делается проверка на разделитель
+		if ((dividers.find(lexem) != dividers.end() || dividers.find(symb) != dividers.end() || symb[0] == '\n' || symb[0] == '\t' || symb == " ") && !flag_comm) {	// делается проверка на разделитель
 			flag_id = true;
 
 			// Проверка на "двойной" divider когда == += <= и тд
@@ -90,7 +93,7 @@ void Parser::Parser_prog(string prog_text, set<string> dividers, set<string> key
 			if (lexem != "")
 				n_lex++;
 
-			if (symb[0] != '\n' && symb != " ") {
+			if (symb[0] != '\n' && symb[0] != '\t' && symb != " ") {
 				lexem = symb;
 			}
 			else 
@@ -100,7 +103,7 @@ void Parser::Parser_prog(string prog_text, set<string> dividers, set<string> key
 			lexem += symb;
 
 		//_________Наложение статуса комментария
-		if (symb == "/" && (prog_text[i + 1] == '*' || prog_text[i + 1] == '/')) {
+		if (!flag_const && symb == "/" && (prog_text[i + 1] == '*' || prog_text[i + 1] == '/')) {
 			flag_comm = true;
 		}
 		//_________
