@@ -41,12 +41,11 @@ private:
 	void value();
 	void parameter();
 	void condition();
-	void conditionsSequence();
 	void logicalOperators();
 	void comparison();
 	void conditionOperator();
-	void cycleDowhile();
-	void cycleWhile();
+	//void cycleDowhile();
+	void cycle();
 	void _bool(); // bool
 	void definition();
 	void assignment();
