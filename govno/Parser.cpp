@@ -146,6 +146,21 @@ void Parser::Find_Error(Token t) {
 	}
 }
 
+vector<Token> Parser::getIdentifierTable()
+{
+	return tab_id;
+}
+
+vector<Token> Parser::getConstantTable()
+{
+	return tab_co;
+}
+
+vector<Token> Parser::getListOfTokens()
+{
+	return token;
+}
+
 void Parser::Set_id(Token t) {
 	for (int i = 0; i < tab_id.size(); i++) {
 		if (tab_id[i].value == t.value) return;

@@ -19,4 +19,8 @@ public:
 	void Set_co(Token);
 	void Push_back(string, string, int, int);
 	void Find_Error(Token);
+
+	vector<Token> getIdentifierTable();
+	vector<Token> getConstantTable();
+	vector<Token> getListOfTokens();
 };

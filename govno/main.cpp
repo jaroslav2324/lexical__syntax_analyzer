@@ -2,6 +2,7 @@
 #include "DividerReader.h"
 #include "KeywordReader.h"
 #include "Parser.h"
+#include "SyntaxParser.h"
 
 int main()
 {
@@ -10,7 +11,15 @@ int main()
 	const char* keywordsFileName = "keywords.txt";  //
 
 	Parser p;
+	vector<Token> listOfTokens;
 	p.Parser_prog(ProgramReader(programFileName), DividerReader(dividersFileName), KeywordReader(keywordsFileName));
-	p.Write();
+	listOfTokens = p.getListOfTokens();
+	//p.Write();
+
+	SyntaxParser syntaxParser;
+	syntaxParser.parseTokens(listOfTokens);
+	syntaxParser.printTree();
+
+
 	return 0;
 }
