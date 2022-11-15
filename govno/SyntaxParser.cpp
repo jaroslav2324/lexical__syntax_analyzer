@@ -39,7 +39,7 @@ void SyntaxParser::S()
 		functionsDefinition();
 		return;
 	}
-	catch (SyntaxError& err) {}
+	catch (SyntaxError&) {}
 
 	numCurrentToken = savedNumToken;
 	try {
@@ -84,7 +84,7 @@ void SyntaxParser::operatorsSequence()
 		operatorsSequence();
 		return;
 	}
-	catch (SyntaxError& err) {}
+	catch (SyntaxError&) {}
 
 	numCurrentToken = savedNumToken;
 	try {
@@ -92,7 +92,7 @@ void SyntaxParser::operatorsSequence()
 		operatorsSequence();
 		return;
 	}
-	catch (SyntaxError& err) {}
+	catch (SyntaxError&) {}
 
 	numCurrentToken = savedNumToken;
 	try {
@@ -100,7 +100,7 @@ void SyntaxParser::operatorsSequence()
 		operatorsSequence();
 		return;
 	}
-	catch (SyntaxError& err) {}
+	catch (SyntaxError&) {}
 
 	numCurrentToken = savedNumToken;
 	try {
@@ -108,7 +108,7 @@ void SyntaxParser::operatorsSequence()
 		operatorsSequence();
 		return;
 	}
-	catch (SyntaxError& err) {}
+	catch (SyntaxError&) {}
 
 	numCurrentToken = savedNumToken;
 	try {
@@ -116,35 +116,35 @@ void SyntaxParser::operatorsSequence()
 		operatorsSequence();
 		return;
 	}
-	catch (SyntaxError& err) {}
+	catch (SyntaxError&) {}
 
 	numCurrentToken = savedNumToken;
 	try {
 		assignment();
 		return;
 	}
-	catch (SyntaxError& err) {}
+	catch (SyntaxError&) {}
 
 	numCurrentToken = savedNumToken;
 	try {
 		definition();
 		return;
 	}
-	catch (SyntaxError& err) {}
+	catch (SyntaxError&) {}
 
 	numCurrentToken = savedNumToken;
 	try {
 		function();
 		return;
 	}
-	catch (SyntaxError& err) {}
+	catch (SyntaxError&) {}
 
 	numCurrentToken = savedNumToken;
 	try {
 		conditionOperator();
 		return;
 	}
-	catch (SyntaxError& err) {
+	catch (SyntaxError&) {
 		numCurrentToken = savedNumToken;
 		cycle();
 	}
@@ -153,5 +153,178 @@ void SyntaxParser::operatorsSequence()
 
 void SyntaxParser::functionsDefinition()
 {
-	cout << "TODO implement functionsDefinition";
+	int savedNumToken = numCurrentToken;
+	try {
+		functionDefinition();
+		return;
+	}
+	catch (SyntaxError&) {
+		numCurrentToken = savedNumToken;
+		functionDefinition();
+		functionsDefinition();
+	}
+}
+
+void SyntaxParser::functionDefinition()
+{
+	std::string errorMessage("Error in functionDefinition");
+	Token token;
+
+	type();
+
+	token = getNextToken();
+	if (token.type != "KEYWORD" || token.value != "proc")
+		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
+	token = getNextToken();
+	if (token.type != "IDENTIFIER")
+		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
+	token = getNextToken();
+	if (token.type != "DEVIDER" || token.value != "(")
+		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
+
+	passedParameters();
+
+	token = getNextToken();
+	if (token.type != "DEVIDER" || token.value != ")")
+		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
+	token = getNextToken();
+	if (token.type != "DEVIDER" || token.value != "{")
+		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
+
+	operatorsSequence();
+
+	token = getNextToken();
+	if (token.type != "KEYWORD" || token.value != "return")
+		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
+
+	value();
+
+	token = getNextToken();
+	if (token.type != "DEVIDER" || token.value != "}")
+		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
+
+}
+
+void SyntaxParser::type()
+{
+	std::string errorMessage("No such type");
+	Token token;
+
+	if (token.type != "KEYWORD" || (token.value != "bool" && token.value != "integer" && token.value != "string"))
+		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
+
+}
+
+void SyntaxParser::passedParameters()
+{
+	std::string errorMessage("Error in passing parameters");
+	Token token;
+
+	int savedNumToken = numCurrentToken;
+	try {
+		parameter();
+		return;
+	}
+	catch (SyntaxError&) {
+		numCurrentToken = savedNumToken;
+		parameter();
+		token = getNextToken();
+		if (token.type != "DEVIDER" || token.value != ",")
+			throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
+		passedParameters();
+	}
+}
+
+void SyntaxParser::value()
+{
+	std::string errorMessage("Wrong value");
+	Token token;
+
+	int savedNumToken = numCurrentToken;
+	try {
+		function();
+		return;
+	}
+	catch (SyntaxError&) {}
+
+	numCurrentToken = savedNumToken;
+	try {
+		arythmeticalExpression();
+		return;
+	}
+	catch (SyntaxError&) {}
+
+	numCurrentToken = savedNumToken;
+	token = getNextToken();
+	if (token.type != "CONSTANT" || token.type != "IDENTIFIER")
+		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
+}
+
+void SyntaxParser::parameter()
+{
+	std::string errorMessage("Wrong parameter in function");
+	Token token;
+
+	int savedNumToken = numCurrentToken;
+	try {
+		type();
+		token = getNextToken();
+		if (token.type != "IDENTIFIER")
+			throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
+	}
+	catch (SyntaxError&) {
+		numCurrentToken = savedNumToken;
+		type();
+	}
+}
+
+void SyntaxParser::condition()
+{
+	std::string errorMessage("Wrong condition");
+	Token token;
+
+	int savedNumToken = numCurrentToken;
+	try {
+		token = getNextToken();
+		if (token.type != "IDENTIFIER")
+			throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
+		comparison();
+		value();
+		return;
+	}
+	catch (SyntaxError&) {}
+
+	numCurrentToken = savedNumToken;
+	try {
+		value();
+		comparison();
+		value();
+		return;
+	}
+	catch (SyntaxError&) {}
+
+	numCurrentToken = savedNumToken;
+	_bool();
+}
+
+void SyntaxParser::logicalOperators()
+{
+	std::string errorMessage("Wrong logical operator");
+	Token token;
+
+	token = getNextToken();
+	if (token.type != "DEVIDER" || (token.value != "&&" && token.value != "||"))
+		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
+
+}
+
+void SyntaxParser::comparison()
+{
+	std::string errorMessage("Wrong comparison operator");
+	Token token;
+
+	token = getNextToken();
+	if (token.type != "DEVIDER" || (token.value != "==" && token.value != "!=" && token.value != "<"
+		&& token.value != ">" && token.value != "<=" && token.value != ">="))
+		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 }
