@@ -26,14 +26,17 @@ void SyntaxParser::S()
 		functionsDefinition();
 	}
 	catch (SyntaxError& err) {
+
 		numCurrentToken = savedNumToken;
+
+		try {
+			mainProgram();
+		}
+		catch (SyntaxError& err) {
+			err.printMessage();
+			exit(-1);
+		}
 	}
-	try {
-		mainProgram();
-	}
-	catch (SyntaxError& err) {
-		err.printMessage();
-		exit(-1);
-	}
+
 	
 }
