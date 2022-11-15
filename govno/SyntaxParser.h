@@ -10,7 +10,7 @@
 class SyntaxParser {
 public:
 
-	//TODO Must return tree
+	//TODO Must return tree and identifier table
 	void parseTokens(vector<Token> listOfTockens);
 	void printTree();
 
@@ -27,8 +27,8 @@ private:
 	// syntax tree
 	// IdentifierTable
 
-	void throwError(char* errorMessage);
-	void throwError(string& errorMessage);
+	void throwError(char* errorMessage, int line, int position);
+	void throwError(string& errorMessage, int line, int position);
 
 	// Non-terminal symbol functions
 	void S();

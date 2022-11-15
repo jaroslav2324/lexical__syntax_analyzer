@@ -18,6 +18,17 @@ Token SyntaxParser::getNextToken()
 	return listOfTokens[numCurrentToken];
 }
 
+void SyntaxParser::throwError(char* errorMessage, int line, int position)
+{
+	std::string message(errorMessage);
+	throwError(message, line, position);
+}
+
+void SyntaxParser::throwError(string& errorMessage, int line, int position)
+{
+	throw SyntaxError(errorMessage, line, position);
+}
+
 void SyntaxParser::S()
 {
 	int savedNumToken = numCurrentToken;
