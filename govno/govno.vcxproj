@@ -144,6 +144,7 @@
     <ClInclude Include="KeywordReader.h" />
     <ClInclude Include="Parser.h" />
     <ClInclude Include="ProgramReader.h" />
+    <ClInclude Include="settings.h" />
     <ClInclude Include="SyntaxError.h" />
     <ClInclude Include="SyntaxParser.h" />
     <ClInclude Include="Token.h" />

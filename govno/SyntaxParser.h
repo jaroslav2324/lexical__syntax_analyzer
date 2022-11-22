@@ -4,8 +4,12 @@
 #include <set>
 #include <vector>
 
+#include "settings.h"
 #include "Token.h"
 #include "SyntaxError.h"
+
+using std::cout;
+using std::endl;
 
 class SyntaxParser {
 public:
@@ -29,6 +33,8 @@ private:
 
 	void throwError(char* errorMessage, int line, int position);
 	void throwError(string& errorMessage, int line, int position);
+
+	void printInDebugMode(const char* msg);
 
 	// Non-terminal symbol functions
 	void S();

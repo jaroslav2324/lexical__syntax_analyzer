@@ -33,6 +33,8 @@ void SyntaxParser::throwError(string& errorMessage, int line, int position)
 
 void SyntaxParser::S()
 {
+	printInDebugMode("S");
+
 	int savedNumToken = numCurrentToken;
 	try {
 		mainProgram();
@@ -54,6 +56,8 @@ void SyntaxParser::S()
 
 void SyntaxParser::mainProgram()
 {
+	printInDebugMode("mainProgram");
+
 	std::string errorMessage("Error in main program");
 	Token token;
 
@@ -77,6 +81,7 @@ void SyntaxParser::mainProgram()
 
 void SyntaxParser::operatorsSequence()
 {
+	printInDebugMode("operatorsSequence");
 
 	int savedNumToken = numCurrentToken;
 	try {
@@ -153,6 +158,8 @@ void SyntaxParser::operatorsSequence()
 
 void SyntaxParser::functionsDefinition()
 {
+	printInDebugMode("functionsDefinition");
+
 	int savedNumToken = numCurrentToken;
 	try {
 		functionDefinition();
@@ -167,6 +174,8 @@ void SyntaxParser::functionsDefinition()
 
 void SyntaxParser::functionDefinition()
 {
+	printInDebugMode("functionDefinition");
+
 	std::string errorMessage("Error in functionDefinition");
 	Token token;
 
@@ -207,6 +216,8 @@ void SyntaxParser::functionDefinition()
 
 void SyntaxParser::type()
 {
+	printInDebugMode("type");
+
 	std::string errorMessage("No such type");
 	Token token;
 
@@ -217,6 +228,8 @@ void SyntaxParser::type()
 
 void SyntaxParser::passedParameters()
 {
+	printInDebugMode("passedParameters");
+
 	std::string errorMessage("Error in passing parameters");
 	Token token;
 
@@ -237,6 +250,8 @@ void SyntaxParser::passedParameters()
 
 void SyntaxParser::value()
 {
+	printInDebugMode("value");
+
 	std::string errorMessage("Wrong value");
 	Token token;
 
@@ -262,6 +277,8 @@ void SyntaxParser::value()
 
 void SyntaxParser::parameter()
 {
+	printInDebugMode("parameter");
+
 	std::string errorMessage("Wrong parameter in function");
 	Token token;
 
@@ -280,6 +297,8 @@ void SyntaxParser::parameter()
 
 void SyntaxParser::condition()
 {
+	printInDebugMode("condition");
+
 	std::string errorMessage("Wrong condition");
 	Token token;
 
@@ -309,6 +328,8 @@ void SyntaxParser::condition()
 
 void SyntaxParser::logicalOperators()
 {
+	printInDebugMode("logicalOperators");
+
 	std::string errorMessage("Wrong logical operator");
 	Token token;
 
@@ -320,6 +341,8 @@ void SyntaxParser::logicalOperators()
 
 void SyntaxParser::comparison()
 {
+	printInDebugMode("comparison");
+
 	std::string errorMessage("Wrong comparison operator");
 	Token token;
 
@@ -331,6 +354,8 @@ void SyntaxParser::comparison()
 
 void SyntaxParser::conditionOperator()
 {
+	printInDebugMode("conditionOperator");
+
 	std::string errorMessage("Wrong if-then-else-endif statement");
 	Token token;
 
@@ -363,6 +388,8 @@ void SyntaxParser::conditionOperator()
 
 void SyntaxParser::cycle()
 {
+	printInDebugMode("cycle");
+
 	std::string errorMessage("Wrong while-do-endwhile statement");
 	Token token;
 
@@ -389,6 +416,8 @@ void SyntaxParser::cycle()
 
 void SyntaxParser::_bool()
 {
+	printInDebugMode("bool");
+
 	std::string errorMessage("Wrong bool value");
 	Token token;
 
@@ -399,6 +428,8 @@ void SyntaxParser::_bool()
 
 void SyntaxParser::definition()
 {
+	printInDebugMode("definition");
+
 	std::string errorMessage("wrong definition");
 	Token token;
 
@@ -415,6 +446,8 @@ void SyntaxParser::definition()
 
 void SyntaxParser::assignment()
 {
+	printInDebugMode("assignment");
+
 	std::string errorMessage("wrong assignment of value");
 	Token token;
 
@@ -435,6 +468,8 @@ void SyntaxParser::assignment()
 
 void SyntaxParser::arythmeticalExpression()
 {
+	printInDebugMode("arythmeticalExpression");
+
 	std::string errorMessage("Wrong arythmetical expression");
 	Token token;
 
@@ -474,6 +509,8 @@ void SyntaxParser::arythmeticalExpression()
 
 void SyntaxParser::sign()
 {
+	printInDebugMode("sign");
+
 	std::string errorMessage("Wrong arythmetical sign");
 	Token token;
 
@@ -484,6 +521,8 @@ void SyntaxParser::sign()
 
 void SyntaxParser::operand()
 {
+	printInDebugMode("operand");
+
 	std::string errorMessage("wrong operand");
 	Token token;
 
@@ -512,6 +551,8 @@ void SyntaxParser::operand()
 
 void SyntaxParser::function()
 {
+	printInDebugMode("function");
+
 	std::string errorMessage("wrong function call");
 	Token token;
 
@@ -554,6 +595,8 @@ void SyntaxParser::function()
 
 void SyntaxParser::functionArguments()
 {
+	printInDebugMode("functionArguments");
+
 	std::string errorMessage("wrong function arguments");
 	Token token;
 
@@ -573,6 +616,8 @@ void SyntaxParser::functionArguments()
 
 void SyntaxParser::conditionsSequence()
 {
+	printInDebugMode("conditionsSequence");
+
 	std::string errorMessage("wrong conditions sequence");
 	Token token;
 
@@ -587,4 +632,9 @@ void SyntaxParser::conditionsSequence()
 	condition();
 	logicalOperators();
 	conditionsSequence();
+}
+
+void SyntaxParser::printInDebugMode(const char* msg) {
+	if (DEBUG_MODE_ON)
+		cout << msg << endl;
 }
