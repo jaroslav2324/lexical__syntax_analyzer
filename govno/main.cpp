@@ -14,7 +14,7 @@ int main()
 	vector<Token> listOfTokens;
 	p.Parser_prog(ProgramReader(programFileName), DividerReader(dividersFileName), KeywordReader(keywordsFileName));
 	listOfTokens = p.getListOfTokens();
-	//p.Write();
+	p.Write();
 
 	SyntaxParser syntaxParser;
 	syntaxParser.parseTokens(listOfTokens);

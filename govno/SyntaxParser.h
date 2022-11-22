@@ -44,7 +44,6 @@ private:
 	void logicalOperators();
 	void comparison();
 	void conditionOperator();
-	//void cycleDowhile();
 	void cycle();
 	void _bool(); // bool
 	void definition();
@@ -54,4 +53,5 @@ private:
 	void operand();
 	void function();
 	void functionArguments();
+	void conditionsSequence();
 };
