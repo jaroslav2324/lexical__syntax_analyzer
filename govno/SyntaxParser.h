@@ -7,6 +7,7 @@
 #include "settings.h"
 #include "Token.h"
 #include "SyntaxError.h"
+#include "MultipleDefinitionError.h"
 
 using std::cout;
 using std::endl;
@@ -17,6 +18,7 @@ public:
 	//TODO Must return tree and identifier table
 	void parseTokens(vector<Token> listOfTockens);
 	void printTree();
+	void printIdentifiersTable();
 
 	// getTree
 	// get IdentifierTable
@@ -24,6 +26,11 @@ public:
 private:
 
 	vector<Token> listOfTokens;
+
+	// <type, id>
+	vector<std::pair<string, string>> identifiersTable;
+
+	void addIdToIdTable(Token type, Token id);
 
 	int numCurrentToken = -1;
 	Token getNextToken();

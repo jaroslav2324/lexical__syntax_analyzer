@@ -12,6 +12,25 @@ void SyntaxParser::printTree()
 	cout << "TODO print tree";
 }
 
+void SyntaxParser::addIdToIdTable(Token typeToken, Token idToken)
+{
+	for (auto& typeIdPair: identifiersTable)
+		if (typeIdPair.first == typeToken.value && typeIdPair.second == idToken.value) {
+			string errorMsg = "This identifier was already defined";
+			throw MultipleDefinitionError(errorMsg, idToken.pos[0], idToken.pos[1]);
+		}
+	identifiersTable.push_back(std::make_pair(typeToken.value, idToken.value));
+}
+
+void SyntaxParser::printIdentifiersTable()
+{
+	int counter = 0;
+	for (auto& typeIdPair : identifiersTable) {
+		cout << counter << "      " << typeIdPair.first << "    " << typeIdPair.second << endl;
+		counter++;
+	}
+}
+
 Token SyntaxParser::getNextToken()
 {
 	numCurrentToken += 1;
@@ -139,9 +158,7 @@ void SyntaxParser::operatorsSequence(bool recursiveCall)
 	{
 		operatorsSequence(true);
 	}
-	catch (SyntaxError&){
-		//numCurrentToken = savedNumToken;
-	}
+	catch (SyntaxError&){}
 	
 }
 
@@ -176,6 +193,9 @@ void SyntaxParser::functionDefinition()
 	token = getNextToken();
 	if (token.type != "IDENTIFIER")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
+
+	addIdToIdTable(listOfTokens[numCurrentToken - 2], token);
+
 	token = getNextToken();
 	if (token.type != "DIVIDER" || token.value != "(")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
@@ -447,6 +467,8 @@ void SyntaxParser::definition()
 	token = getNextToken();
 	if (token.type != "IDENTIFIER")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
+
+	addIdToIdTable(listOfTokens[numCurrentToken - 1], token);
 
 	token = getNextToken();
 	if (token.type != "DIVIDER" || token.value != ";")
