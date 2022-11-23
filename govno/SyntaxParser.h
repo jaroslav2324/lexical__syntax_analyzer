@@ -39,7 +39,7 @@ private:
 	// Non-terminal symbol functions
 	void S();
 	void mainProgram();
-	void operatorsSequence();
+	void operatorsSequence(bool recursiveCall);
 	void functionsDefinition();
 	void functionDefinition();
 	void type();
@@ -54,7 +54,7 @@ private:
 	void _bool(); // bool
 	void definition();
 	void assignment();
-	void arythmeticalExpression();
+	void arythmeticalExpression(bool recursiveCall);
 	void sign();
 	void operand();
 	void function();
