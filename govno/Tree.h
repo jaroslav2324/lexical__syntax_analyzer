@@ -1,5 +1,5 @@
 #pragma once
-#include <vector>
+#include "ElementOfTree.h"
 #include <queue>
 #include <iostream>
 
@@ -27,8 +27,12 @@ private:
 
 	ElementOfTree* searchingOfElement(ElementOfTree* node, int indexOfDesiredNode);
 
+	void freeMemory();
+
 public:
 	Tree();
+
+	~Tree();
 
 	Tree(const Tree& t2);
 

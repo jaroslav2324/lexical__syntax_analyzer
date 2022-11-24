@@ -84,3 +84,24 @@ void Tree::print(ElementOfTree* node) {
 	}
 	if (node->sons.size() == 0) level--;
 }
+
+void Tree::freeMemory() {
+	ElementOfTree* node = root;
+	std::queue<ElementOfTree*> queue;
+	queue.push(node);
+
+	while (!queue.empty()) {
+		node = queue.front();
+		queue.pop();
+
+		for (int i = 0; i < node->sons.size(); ++i) {
+			queue.push(node->sons[i]);
+		}
+		delete node;
+	}
+}
+
+Tree::~Tree() {
+	std::cout << "Destructor!\n";
+	freeMemory();
+}
