@@ -26,6 +26,11 @@ Tree::Tree(std::string nameOfRoot) {
 	amountElements = 1;
 }
 
+ElementOfTree* Tree::searchFromRoot(int indexOfNode)
+{
+	return searchingOfElement(root, indexOfNode);
+}
+
 Tree::Tree() {
 	root = new ElementOfTree(0, "root");
 	amountElements = 1;

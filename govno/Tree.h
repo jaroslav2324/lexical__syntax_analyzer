@@ -26,6 +26,8 @@ public:
 
 	Tree(std::string nameOfRoot);
 
+	ElementOfTree* searchFromRoot(int indexOfNode);
+
 	int getAmountElements();
 	void addElementInTree(ElementOfTree* node, int indexOfDesiredNode);
 	

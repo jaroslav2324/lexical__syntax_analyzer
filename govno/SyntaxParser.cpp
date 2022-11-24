@@ -688,6 +688,8 @@ void SyntaxParser::arythmeticalExpression(int indexParentNode)
 		ElementOfTree* signNode = new ElementOfTree(indexSignNode, "NULL");
 		tree->addElementInTree(signNode, indexParentNode);
 		operand(indexSignNode);
+		signNode = tree->searchFromRoot(indexSignNode);
+		printTreeInDebug();
 		sign(signNode);
 		arythmeticalExpression(indexSignNode);
 		return;
@@ -698,9 +700,10 @@ void SyntaxParser::arythmeticalExpression(int indexParentNode)
 
 	numCurrentToken = savedNumToken;
 	int indexSignNode = tree->getAmountElements();
-	ElementOfTree* signNode = new ElementOfTree(tree->getAmountElements(), "NULL");
+	ElementOfTree* signNode = new ElementOfTree(indexSignNode, "NULL");
 	tree->addElementInTree(signNode, indexParentNode);
 	operand(indexSignNode);
+	signNode = tree->searchFromRoot(indexSignNode);
 	sign(signNode);
 	operand(indexSignNode);
 }
@@ -727,6 +730,7 @@ void SyntaxParser::operand(int indexParentNode)
 
 	int savedNumToken = numCurrentToken;
 	saveTree();
+	printTreeInDebug();
 	int indexSavedTree = numLastSavedTree;
 
 	try {
@@ -855,6 +859,7 @@ void SyntaxParser::conditionsSequence(int indexParentNode)
 
 	try {
 		condition(indexParentNode);
+		printTreeInDebug();
 		return;
 	}
 	catch (SyntaxError&) {
