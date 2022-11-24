@@ -2,6 +2,8 @@
 #include <vector>
 #include <iostream>
 
+#include "settings.h"
+
 class ElementOfTree {
 public:
 	ElementOfTree() {}

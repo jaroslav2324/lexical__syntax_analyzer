@@ -17,7 +17,8 @@ Tree::Tree(const Tree& t2) {
 		}
 	}
 	amountElements = t2.amountElements;
-	std::cout << "Copying constructor is worked!\n";
+	if (DEBUG_MODE_ON && DEBUG_PRINT_CONSTRUCTORS)
+		std::cout << "Copying constructor is worked!\n";
 }
 
 Tree::Tree(std::string nameOfRoot) {
@@ -102,6 +103,7 @@ void Tree::freeMemory() {
 }
 
 Tree::~Tree() {
-	std::cout << "Destructor!\n";
+	if (DEBUG_MODE_ON && DEBUG_PRINT_CONSTRUCTORS)
+		std::cout << "Destructor!\n";
 	freeMemory();
 }

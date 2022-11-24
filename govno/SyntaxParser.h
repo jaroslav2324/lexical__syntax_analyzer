@@ -16,6 +16,9 @@ using std::endl;
 class SyntaxParser {
 public:
 
+	SyntaxParser();
+	~SyntaxParser();
+
 	//TODO Must return tree and identifier table
 	void parseTokens(vector<Token> listOfTockens);
 	void printTree();
@@ -33,9 +36,9 @@ private:
 	int numCurrentToken = -1;
 	Token getNextToken();
 
-	Tree tree;
+	Tree* tree;
 
-	vector<Tree> listSavedTrees;
+	vector<Tree*> listSavedTrees;
 	int numLastSavedTree = -1;
 	void saveTree();
 	void loadSavedTreeWithIndex(int index);
@@ -44,6 +47,7 @@ private:
 	void throwError(string& errorMessage, int line, int position);
 
 	void printInDebugMode(const char* msg);
+	void printTreeInDebug();
 
 	// Non-terminal symbol functions
 	void S(int indexParentNode);
