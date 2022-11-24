@@ -149,6 +149,7 @@
     <ClInclude Include="SyntaxError.h" />
     <ClInclude Include="SyntaxParser.h" />
     <ClInclude Include="Token.h" />
+    <ClInclude Include="Tree.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DividerReader.cpp" />
@@ -159,6 +160,7 @@
     <ClCompile Include="ProgramReader.cpp" />
     <ClCompile Include="SyntaxError.cpp" />
     <ClCompile Include="SyntaxParser.cpp" />
+    <ClCompile Include="Tree.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

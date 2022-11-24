@@ -8,6 +8,7 @@
 #include "Token.h"
 #include "SyntaxError.h"
 #include "MultipleDefinitionError.h"
+#include "Tree.h"
 
 using std::cout;
 using std::endl;
@@ -19,9 +20,6 @@ public:
 	void parseTokens(vector<Token> listOfTockens);
 	void printTree();
 	void printIdentifiersTable();
-
-	// getTree
-	// get IdentifierTable
 
 private:
 
@@ -35,8 +33,7 @@ private:
 	int numCurrentToken = -1;
 	Token getNextToken();
 
-	// syntax tree
-	// IdentifierTable
+	Tree tree;
 
 	void throwError(char* errorMessage, int line, int position);
 	void throwError(string& errorMessage, int line, int position);

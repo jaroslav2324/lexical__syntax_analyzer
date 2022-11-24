@@ -20,8 +20,8 @@ int main()
 
 	SyntaxParser syntaxParser;
 	syntaxParser.parseTokens(listOfTokens);
-	//syntaxParser.printTree();
-	syntaxParser.printIdentifiersTable();
+	syntaxParser.printTree();
+	//syntaxParser.printIdentifiersTable();
 
 
 	return 0;

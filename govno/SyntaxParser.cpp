@@ -4,12 +4,18 @@ void SyntaxParser::parseTokens(vector<Token> listOfTockens)
 {
 	SyntaxParser::listOfTokens = listOfTockens;
 
-	S();
+	try {
+		S();
+	}
+	catch (MultipleDefinitionError& err) {
+		err.printMessage();
+	}
+		
 }
 
 void SyntaxParser::printTree()
 {
-	cout << "TODO print tree";
+	tree.printTree();
 }
 
 void SyntaxParser::addIdToIdTable(Token typeToken, Token idToken)
