@@ -1,7 +1,7 @@
 #include "Tree.h"
 
 Tree::Tree(const Tree& t2) {
-	root = new ElementOfTree(t2.root->id);
+	root = new ElementOfTree(t2.root->id, t2.root->name);
 	auto node = t2.root;
 	std::queue<ElementOfTree*> queue;
 	queue.push(node);
@@ -11,29 +11,37 @@ Tree::Tree(const Tree& t2) {
 		queue.pop();
 
 		for (int i = 0; i < node->sons.size(); ++i) {
-			ElementOfTree* temp = new ElementOfTree(node->sons[i]->id);
+			ElementOfTree* temp = new ElementOfTree(node->sons[i]->id, node->sons[i]->name);
 			this->addElementInTree(temp, node->id);
 			queue.push(node->sons[i]);
 		}
 	}
+	amountElements = t2.amountElements;
 	std::cout << "Copying constructor is worked!\n";
 }
 
 Tree::Tree(std::string nameOfRoot) {
-	root = new ElementOfTree(nameOfRoot);
+	root = new ElementOfTree(0, nameOfRoot);
+	amountElements = 1;
 }
 
 Tree::Tree() {
-	root = new ElementOfTree("root");
+	root = new ElementOfTree(0, "root");
+	amountElements = 1;
 }
 
-ElementOfTree* Tree::searchingOfElement(ElementOfTree* node, std::string nameOfDesiredNode) {
+int Tree::getAmountElements()
+{
+	return amountElements;
+}
+
+ElementOfTree* Tree::searchingOfElement(ElementOfTree* node, int indexOfDesiredNode) {
 	std::queue<ElementOfTree*> queue;
 	queue.push(node);
 	while (!queue.empty()) {
 		node = queue.front();
 		queue.pop();
-		if (node->id == nameOfDesiredNode) return node;
+		if (node->id == indexOfDesiredNode) return node;
 
 		for (int i = 0; i < node->sons.size(); ++i) {
 			queue.push(node->sons[i]);
@@ -42,10 +50,11 @@ ElementOfTree* Tree::searchingOfElement(ElementOfTree* node, std::string nameOfD
 	return nullptr;
 }
 
-void Tree::addElementInTree(ElementOfTree* node, std::string nameOfDesiredNode) {
-	ElementOfTree* searchableElement = searchingOfElement(root, nameOfDesiredNode);
+void Tree::addElementInTree(ElementOfTree* node, int indexOfDesiredNode) {
+	ElementOfTree* searchableElement = searchingOfElement(root, indexOfDesiredNode);
 	if (searchableElement == nullptr) throw std::runtime_error("Pizdec");
 	searchableElement->sons.push_back(node);
+	amountElements++;
 }
 
 void Tree::printTree() {
@@ -64,7 +73,7 @@ void Tree::print(ElementOfTree* node) {
 		std::cout << "| ";
 	}
 
-	std::cout << "[+](" << level << "-" << (node->id) << ")\n";
+	std::cout << "[+](" << level << "-" << (node->name) << ")\n";
 
 	int i = 0;
 	while (i != node->sons.size()) {

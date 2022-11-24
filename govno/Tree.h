@@ -7,9 +7,10 @@ class ElementOfTree {
 public:
 	ElementOfTree() {}
 
-	ElementOfTree(std::string id) : id(id) {}
+	ElementOfTree(int id, std::string name) : id(id), name(name) {}
 
-	std::string id{};
+	int id{};
+	std::string name;
 
 	std::vector<ElementOfTree*> sons;
 };
@@ -22,7 +23,9 @@ private:
 
 	void print(ElementOfTree* node);
 
-	ElementOfTree* searchingOfElement(ElementOfTree* node, std::string nameOfDesiredNode);
+	int amountElements = 0;
+
+	ElementOfTree* searchingOfElement(ElementOfTree* node, int indexOfDesiredNode);
 
 public:
 	Tree();
@@ -31,7 +34,8 @@ public:
 
 	Tree(std::string nameOfRoot);
 
-	void addElementInTree(ElementOfTree* node, std::string);
-
+	int getAmountElements();
+	void addElementInTree(ElementOfTree* node, int indexOfDesiredNode);
+	
 	void printTree();
 };

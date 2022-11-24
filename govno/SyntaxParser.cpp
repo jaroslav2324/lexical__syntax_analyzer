@@ -5,7 +5,7 @@ void SyntaxParser::parseTokens(vector<Token> listOfTockens)
 	SyntaxParser::listOfTokens = listOfTockens;
 
 	try {
-		S();
+		S(0);
 	}
 	catch (MultipleDefinitionError& err) {
 		err.printMessage();
@@ -13,8 +13,7 @@ void SyntaxParser::parseTokens(vector<Token> listOfTockens)
 		
 }
 
-void SyntaxParser::printTree()
-{
+void SyntaxParser::printTree(){
 	tree.printTree();
 }
 
@@ -45,6 +44,19 @@ Token SyntaxParser::getNextToken()
 	return listOfTokens[numCurrentToken];
 }
 
+void SyntaxParser::saveTree()
+{
+	listSavedTrees.push_back(tree);
+	numLastSavedTree++;
+}
+
+void SyntaxParser::loadSavedTreeWithIndex(int index)
+{
+	for (int i = listSavedTrees.size() - 1; i > index; i--)
+		listSavedTrees.pop_back();
+	tree = listSavedTrees[index];
+}
+
 void SyntaxParser::throwError(char* errorMessage, int line, int position)
 {
 	std::string message(errorMessage);
@@ -56,21 +68,29 @@ void SyntaxParser::throwError(string& errorMessage, int line, int position)
 	throw SyntaxError(errorMessage, line, position);
 }
 
-void SyntaxParser::S()
+void SyntaxParser::S(int indexParentNode)
 {
 	printInDebugMode("S");
 
 	int savedNumToken = numCurrentToken;
+	int indexSavedTree = numLastSavedTree;
+	saveTree();
 	try {
-		mainProgram();
-		functionsDefinition();
+		ElementOfTree* node = new ElementOfTree(tree.getAmountElements(), "program");
+		tree.addElementInTree(node, indexParentNode);
+		mainProgram(tree.getAmountElements() - 1);
+		functionsDefinition(0);
 		return;
 	}
-	catch (SyntaxError&) {}
+	catch (SyntaxError&) {
+		loadSavedTreeWithIndex(numLastSavedTree);
+	}
 
 	numCurrentToken = savedNumToken;
 	try {
-		mainProgram();
+		ElementOfTree* node = new ElementOfTree(tree.getAmountElements(), "program");
+		tree.addElementInTree(node, indexParentNode);
+		mainProgram(tree.getAmountElements() - 1);
 	}
 	catch (SyntaxError& err) {
 		err.printMessage();
@@ -79,7 +99,7 @@ void SyntaxParser::S()
 	
 }
 
-void SyntaxParser::mainProgram()
+void SyntaxParser::mainProgram(int indexParentNode)
 {
 	printInDebugMode("mainProgram");
 
@@ -98,62 +118,106 @@ void SyntaxParser::mainProgram()
 	token = getNextToken();
 	if (token.type != "DIVIDER" || token.value != "{")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
-	operatorsSequence(false);
+	operatorsSequence(indexParentNode);
 	token = getNextToken();
 	if (token.type != "DIVIDER" || token.value != "}")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 }
 
-void SyntaxParser::operatorsSequence(bool recursiveCall)
+void SyntaxParser::operatorsSequence(int indexParentNode)
 {
 	printInDebugMode("operatorsSequence");
 
 	bool flag_convolution_worked_on_something = false;
 	int savedNumToken = numCurrentToken;
+	int indexSavedTree;
 
+	saveTree();
+	printTree();
+	indexSavedTree = numLastSavedTree;
 	try {
-		assignment();
+		ElementOfTree* node = new ElementOfTree(tree.getAmountElements(), "assignment");
+		tree.addElementInTree(node, indexParentNode);
+		assignment(tree.getAmountElements() - 1);
+
+		printTree();
+
 		flag_convolution_worked_on_something = true;
 		savedNumToken = numCurrentToken;
+		saveTree();
+		indexSavedTree = numLastSavedTree;
 	}
 	catch (SyntaxError&) {
 		numCurrentToken = savedNumToken;
+		loadSavedTreeWithIndex(indexSavedTree);
 	}
 
 	try {
-		definition();
+		ElementOfTree* node = new ElementOfTree(tree.getAmountElements(), "definition");
+		tree.addElementInTree(node, indexParentNode);
+		definition(tree.getAmountElements() - 1);
+
+		printTree();
+
 		flag_convolution_worked_on_something = true;
 		savedNumToken = numCurrentToken;
+		saveTree();
+		indexSavedTree = numLastSavedTree;
 	}
 	catch (SyntaxError&) {
 		numCurrentToken = savedNumToken;
+		loadSavedTreeWithIndex(indexSavedTree);
 	}
 
 	try {
-		function();
+		ElementOfTree* node = new ElementOfTree(tree.getAmountElements(), "func_call");
+		tree.addElementInTree(node, indexParentNode);
+		function(tree.getAmountElements() - 1);
+
+		printTree();
+
 		flag_convolution_worked_on_something = true;
 		savedNumToken = numCurrentToken;
+		saveTree();
+		indexSavedTree = numLastSavedTree;
 	}
 	catch (SyntaxError&) {
 		numCurrentToken = savedNumToken;
+		loadSavedTreeWithIndex(indexSavedTree);
 	}
 
 	try {
-		conditionOperator();
+		ElementOfTree* node = new ElementOfTree(tree.getAmountElements(), "if");
+		tree.addElementInTree(node, indexParentNode);
+		conditionOperator(tree.getAmountElements() - 1);
+
+		printTree();
+
 		flag_convolution_worked_on_something = true;
 		savedNumToken = numCurrentToken;
+		saveTree();
+		indexSavedTree = numLastSavedTree;
 	}
 	catch (SyntaxError&) {
 		numCurrentToken = savedNumToken;
+		loadSavedTreeWithIndex(indexSavedTree);
 	}
 
 	try {
-		cycle();
+		ElementOfTree* node = new ElementOfTree(tree.getAmountElements(), "while");
+		tree.addElementInTree(node, indexParentNode);
+		cycle(tree.getAmountElements() - 1);
+
+		printTree();
+
 		flag_convolution_worked_on_something = true;
 		savedNumToken = numCurrentToken;
+		saveTree();
+		indexSavedTree = numLastSavedTree;
 	}
 	catch (SyntaxError&) {
 		numCurrentToken = savedNumToken;
+		loadSavedTreeWithIndex(indexSavedTree);
 	}
 
 	//TODO change
@@ -162,43 +226,58 @@ void SyntaxParser::operatorsSequence(bool recursiveCall)
 
 	try
 	{
-		operatorsSequence(true);
+		operatorsSequence(indexParentNode);
 	}
-	catch (SyntaxError&){}
+	catch (SyntaxError&){
+		loadSavedTreeWithIndex(indexSavedTree);
+	}
 	
 }
 
-void SyntaxParser::functionsDefinition()
+void SyntaxParser::functionsDefinition(int indexParentNode)
 {
 	printInDebugMode("functionsDefinition");
 
 	int savedNumToken = numCurrentToken;
+	int indexSavedTree = numLastSavedTree;
+	saveTree();
 	try {
-		functionDefinition();
+		ElementOfTree* node = new ElementOfTree(tree.getAmountElements(), "function");
+		tree.addElementInTree(node, indexParentNode);
+		functionDefinition(tree.getAmountElements() - 1);
 		return;
 	}
 	catch (SyntaxError&) {
+		loadSavedTreeWithIndex(numLastSavedTree);
 		numCurrentToken = savedNumToken;
-		functionDefinition();
-		functionsDefinition();
+
+		ElementOfTree* node = new ElementOfTree(tree.getAmountElements(), "function");
+		tree.addElementInTree(node, indexParentNode);
+		functionDefinition(tree.getAmountElements() - 1);
+		functionsDefinition(indexParentNode);
 	}
 }
 
-void SyntaxParser::functionDefinition()
+void SyntaxParser::functionDefinition(int indexParentNode)
 {
 	printInDebugMode("functionDefinition");
 
 	std::string errorMessage("Error in functionDefinition");
 	Token token;
 
-	type();
+	type(indexParentNode);
 
 	token = getNextToken();
 	if (token.type != "KEYWORD" || token.value != "proc")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
+
 	token = getNextToken();
 	if (token.type != "IDENTIFIER")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
+	
+	// add id to tree
+	ElementOfTree* node = new ElementOfTree(tree.getAmountElements(), token.value);
+	tree.addElementInTree(node, indexParentNode);
 
 	addIdToIdTable(listOfTokens[numCurrentToken - 2], token);
 
@@ -206,7 +285,9 @@ void SyntaxParser::functionDefinition()
 	if (token.type != "DIVIDER" || token.value != "(")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 
-	passedParameters();
+	node = new ElementOfTree(tree.getAmountElements(), "params");
+	tree.addElementInTree(node, indexParentNode);
+	passedParameters(tree.getAmountElements() - 1);
 
 	token = getNextToken();
 	if (token.type != "DIVIDER" || token.value != ")")
@@ -215,13 +296,17 @@ void SyntaxParser::functionDefinition()
 	if (token.type != "DIVIDER" || token.value != "{")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 
-	operatorsSequence(false);
+	node = new ElementOfTree(tree.getAmountElements(), "body");
+	tree.addElementInTree(node, indexParentNode);
+	operatorsSequence(tree.getAmountElements() - 1);
 
 	token = getNextToken();
 	if (token.type != "KEYWORD" || token.value != "return")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 
-	value();
+	node = new ElementOfTree(tree.getAmountElements(), "ret");
+	tree.addElementInTree(node, indexParentNode);
+	value(tree.getAmountElements() - 1);
 
 	token = getNextToken();
 	if (token.type != "DIVIDER" || token.value != ";")
@@ -233,7 +318,7 @@ void SyntaxParser::functionDefinition()
 
 }
 
-void SyntaxParser::type()
+void SyntaxParser::type(int indexParentNode)
 {
 	printInDebugMode("type");
 
@@ -244,9 +329,12 @@ void SyntaxParser::type()
 	if (token.type != "KEYWORD" || (token.value != "bool" && token.value != "integer" && token.value != "string"))
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 
+	ElementOfTree* node = new ElementOfTree(tree.getAmountElements(), token.value);
+	tree.addElementInTree(node, indexParentNode);
+
 }
 
-void SyntaxParser::passedParameters()
+void SyntaxParser::passedParameters(int indexParentNode)
 {
 	printInDebugMode("passedParameters");
 
@@ -254,21 +342,28 @@ void SyntaxParser::passedParameters()
 	Token token;
 
 	int savedNumToken = numCurrentToken;
+	int indexSavedTree = numLastSavedTree;
 	try {
-		parameter();
+		ElementOfTree* node = new ElementOfTree(tree.getAmountElements(), "param");
+		tree.addElementInTree(node, indexParentNode);
+		parameter(tree.getAmountElements() - 1);
 		return;
 	}
 	catch (SyntaxError&) {
 		numCurrentToken = savedNumToken;
-		parameter();
+		loadSavedTreeWithIndex(indexSavedTree);
+
+		ElementOfTree* node = new ElementOfTree(tree.getAmountElements(), "param");
+		tree.addElementInTree(node, indexParentNode);
+		parameter(tree.getAmountElements() - 1);
 		token = getNextToken();
-		if (token.type != "DEVIDER" || token.value != ",")
+		if (token.type != "DIVIDER" || token.value != ",")
 			throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
-		passedParameters();
+		passedParameters(indexParentNode);
 	}
 }
 
-void SyntaxParser::value()
+void SyntaxParser::value(int indexParentNode)
 {
 	printInDebugMode("value");
 
@@ -276,27 +371,42 @@ void SyntaxParser::value()
 	Token token;
 
 	int savedNumToken = numCurrentToken;
+	int indexSavedTree = numLastSavedTree;
+
+	saveTree();
 	try {
-		function();
+		ElementOfTree* node = new ElementOfTree(tree.getAmountElements(), "function");
+		tree.addElementInTree(node, indexParentNode);
+		function(tree.getAmountElements() - 1);
 		return;
 	}
-	catch (SyntaxError&) {}
+	catch (SyntaxError&) {
+		loadSavedTreeWithIndex(indexSavedTree);
+	}
 
 	numCurrentToken = savedNumToken;
 	try {
-		arythmeticalExpression(false);
+		ElementOfTree* node = new ElementOfTree(tree.getAmountElements(), "expr");
+		tree.addElementInTree(node, indexParentNode);
+		arythmeticalExpression(tree.getAmountElements() - 1);
 		return;
 	}
-	catch (SyntaxError&) {}
+	catch (SyntaxError&) {
+		loadSavedTreeWithIndex(indexSavedTree);
+	}
 
 	try {
 		numCurrentToken = savedNumToken;
 		token = getNextToken();
 		if (token.type != "IDENTIFIER" && token.type != "CONSTANT" && (token.type != "KEYWORD" || (token.value != "true" && token.value != "false")))
 			throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
+		ElementOfTree* node = new ElementOfTree(tree.getAmountElements(), token.value);
+		tree.addElementInTree(node, indexParentNode);
 		return;
 	}
-	catch (SyntaxError&) {}
+	catch (SyntaxError&) {
+		loadSavedTreeWithIndex(indexSavedTree);
+	}
 
 	numCurrentToken = savedNumToken;
 	token = getNextToken();
@@ -305,12 +415,14 @@ void SyntaxParser::value()
 	token = getNextToken();
 	if (token.type != "CONSTANT" && token.type != "KEYWORD")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
+	ElementOfTree* node = new ElementOfTree(tree.getAmountElements(), token.value);
+	tree.addElementInTree(node, indexParentNode);
 	token = getNextToken();
 	if (token.type != "DIVIDER" || token.value != "\"")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 }
 
-void SyntaxParser::parameter()
+void SyntaxParser::parameter(int indexParentNode)
 {
 	printInDebugMode("parameter");
 
@@ -318,19 +430,26 @@ void SyntaxParser::parameter()
 	Token token;
 
 	int savedNumToken = numCurrentToken;
+	int indexSavedTree = numLastSavedTree;
 	try {
-		type();
+		type(indexParentNode);
+
 		token = getNextToken();
 		if (token.type != "IDENTIFIER")
 			throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
+
+		ElementOfTree* node = new ElementOfTree(tree.getAmountElements(), token.value);
+		tree.addElementInTree(node, indexParentNode);
 	}
 	catch (SyntaxError&) {
+		loadSavedTreeWithIndex(indexSavedTree);
 		numCurrentToken = savedNumToken;
-		type();
+
+		type(indexParentNode);
 	}
 }
 
-void SyntaxParser::condition()
+void SyntaxParser::condition(int indexParentNode)
 {
 	printInDebugMode("condition");
 
@@ -338,30 +457,48 @@ void SyntaxParser::condition()
 	Token token;
 
 	int savedNumToken = numCurrentToken;
+	int indexSavedTree = numLastSavedTree;
+
+	saveTree();
 	try {
 		token = getNextToken();
 		if (token.type != "IDENTIFIER")
 			throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
-		comparison();
-		value();
+		ElementOfTree* idNode = new ElementOfTree(tree.getAmountElements(), token.value);
+
+		int indexComparisonNode = tree.getAmountElements();
+		ElementOfTree* comparisonNode = new ElementOfTree(indexComparisonNode, "");
+		tree.addElementInTree(comparisonNode, indexParentNode);
+		comparison(comparisonNode);
+		tree.addElementInTree(idNode, indexComparisonNode);
+
+		value(indexComparisonNode);
 		return;
 	}
-	catch (SyntaxError&) {}
+	catch (SyntaxError&) {
+		loadSavedTreeWithIndex(indexSavedTree);
+	}
 
 	numCurrentToken = savedNumToken;
 	try {
-		value();
-		comparison();
-		value();
+		int indexComparisonNode = tree.getAmountElements();
+		ElementOfTree* comparisonNode = new ElementOfTree(indexComparisonNode, "");
+		tree.addElementInTree(comparisonNode, indexParentNode);
+
+		value(indexComparisonNode);
+		comparison(comparisonNode);
+		value(indexComparisonNode);
 		return;
 	}
-	catch (SyntaxError&) {}
+	catch (SyntaxError&) {
+		loadSavedTreeWithIndex(indexSavedTree);
+	}
 
 	numCurrentToken = savedNumToken;
-	_bool();
+	_bool(indexParentNode);
 }
 
-void SyntaxParser::logicalOperators()
+void SyntaxParser::logicalOperators(ElementOfTree* fillThisNodeWithName)
 {
 	printInDebugMode("logicalOperators");
 
@@ -369,12 +506,13 @@ void SyntaxParser::logicalOperators()
 	Token token;
 
 	token = getNextToken();
-	if (token.type != "DEVIDER" || (token.value != "&&" && token.value != "||"))
+	if (token.type != "DIVIDER" || (token.value != "&&" && token.value != "||"))
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
+	fillThisNodeWithName->name = token.value;
 
 }
 
-void SyntaxParser::comparison()
+void SyntaxParser::comparison(ElementOfTree* fillValueOfThisNodeWithSign)
 {
 	printInDebugMode("comparison");
 
@@ -385,9 +523,10 @@ void SyntaxParser::comparison()
 	if (token.type != "DIVIDER" || (token.value != "==" && token.value != "!=" && token.value != "<"
 		&& token.value != ">" && token.value != "<=" && token.value != ">="))
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
+	fillValueOfThisNodeWithSign->name = token.value;
 }
 
-void SyntaxParser::conditionOperator()
+void SyntaxParser::conditionOperator(int indexParentNode)
 {
 	printInDebugMode("conditionOperator");
 
@@ -398,19 +537,26 @@ void SyntaxParser::conditionOperator()
 	if (token.type != "KEYWORD" || token.value != "if")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 
-	condition();
+	ElementOfTree* node = new ElementOfTree(tree.getAmountElements(), "cond");
+	tree.addElementInTree(node, indexParentNode);
+	condition(tree.getAmountElements() - 1);
 
 	token = getNextToken();
 	if (token.type != "KEYWORD" || token.value != "then")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 
-	operatorsSequence(false);
+
+	node = new ElementOfTree(tree.getAmountElements(), "then");
+	tree.addElementInTree(node, indexParentNode);
+	operatorsSequence(tree.getAmountElements() - 1);
 
 	token = getNextToken();
 	if (token.type != "KEYWORD" || token.value != "else")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 
-	operatorsSequence(false);
+	node = new ElementOfTree(tree.getAmountElements(), "else");
+	tree.addElementInTree(node, indexParentNode);
+	operatorsSequence(tree.getAmountElements() - 1);
 
 	token = getNextToken();
 	if (token.type != "KEYWORD" || token.value != "endif")
@@ -421,7 +567,7 @@ void SyntaxParser::conditionOperator()
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 }
 
-void SyntaxParser::cycle()
+void SyntaxParser::cycle(int indexParentNode)
 {
 	printInDebugMode("cycle");
 
@@ -432,13 +578,17 @@ void SyntaxParser::cycle()
 	if (token.type != "KEYWORD" || token.value != "while")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 
-	conditionsSequence();
+	ElementOfTree* node = new ElementOfTree(tree.getAmountElements(), "while");
+	tree.addElementInTree(node, indexParentNode);
+	conditionsSequence(tree.getAmountElements() - 1);
 
 	token = getNextToken();
 	if (token.type != "DIVIDER" || token.value != ";")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 
-	operatorsSequence(false);
+	node = new ElementOfTree(tree.getAmountElements(), "body");
+	tree.addElementInTree(node, indexParentNode);
+	operatorsSequence(tree.getAmountElements() - 1);
 
 	token = getNextToken();
 	if (token.type != "KEYWORD" || token.value != "endwhile")
@@ -449,7 +599,7 @@ void SyntaxParser::cycle()
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 }
 
-void SyntaxParser::_bool()
+void SyntaxParser::_bool(int indexParentNode)
 {
 	printInDebugMode("bool");
 
@@ -459,20 +609,25 @@ void SyntaxParser::_bool()
 	token = getNextToken();
 	if (token.type != "KEYWORD" || (token.value != "true" && token.value != "false"))
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
+	ElementOfTree* node = new ElementOfTree(tree.getAmountElements(), token.value);
+	tree.addElementInTree(node, indexParentNode);
 }
 
-void SyntaxParser::definition()
+void SyntaxParser::definition(int indexParentNode)
 {
 	printInDebugMode("definition");
 
 	std::string errorMessage("wrong definition");
 	Token token;
 
-	type();
+	type(indexParentNode);
 
 	token = getNextToken();
 	if (token.type != "IDENTIFIER")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
+
+	ElementOfTree* node = new ElementOfTree(tree.getAmountElements(), token.value);
+	tree.addElementInTree(node, indexParentNode);
 
 	addIdToIdTable(listOfTokens[numCurrentToken - 1], token);
 
@@ -481,7 +636,7 @@ void SyntaxParser::definition()
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 }
 
-void SyntaxParser::assignment()
+void SyntaxParser::assignment(int indexParentNode)
 {
 	printInDebugMode("assignment");
 
@@ -491,19 +646,21 @@ void SyntaxParser::assignment()
 	token = getNextToken();
 	if (token.type != "IDENTIFIER")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
+	ElementOfTree* node = new ElementOfTree(tree.getAmountElements(), token.value);
+	tree.addElementInTree(node, indexParentNode);
 
 	token = getNextToken();
 	if (token.type != "DIVIDER" || token.value != "=")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 
-	value();
+	value(indexParentNode);
 
 	token = getNextToken();
 	if (token.type != "DIVIDER" || token.value != ";")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 }
 
-void SyntaxParser::arythmeticalExpression(bool recursiveCall)
+void SyntaxParser::arythmeticalExpression(int indexParentNode)
 {
 	printInDebugMode("arythmeticalExpression");
 	bool flag_recursive_error = false;
@@ -512,21 +669,32 @@ void SyntaxParser::arythmeticalExpression(bool recursiveCall)
 	Token token;
 	
 	int savedNumToken = numCurrentToken;
+	int indexSavedTree = numLastSavedTree;
+
+	saveTree();
 	try{
-		operand();
-		sign();
-		arythmeticalExpression(true);
+		int indexSignNode = tree.getAmountElements();
+		ElementOfTree* signNode = new ElementOfTree(indexSignNode, "NULL");
+		tree.addElementInTree(signNode, indexParentNode);
+		operand(indexSignNode);
+		sign(signNode);
+		arythmeticalExpression(indexSignNode);
 		return;
 	}
-	catch (SyntaxError& err){}
+	catch (SyntaxError& err){
+		loadSavedTreeWithIndex(indexSavedTree);
+	}
 
 	numCurrentToken = savedNumToken;
-	operand();
-	sign();
-	operand();
+	int indexSignNode = tree.getAmountElements();
+	ElementOfTree* signNode = new ElementOfTree(tree.getAmountElements(), "NULL");
+	tree.addElementInTree(signNode, indexParentNode);
+	operand(indexSignNode);
+	sign(signNode);
+	operand(indexSignNode);
 }
 
-void SyntaxParser::sign()
+void SyntaxParser::sign(ElementOfTree* fillValueOfThisNodeWithSign)
 {
 	printInDebugMode("sign");
 
@@ -536,9 +704,10 @@ void SyntaxParser::sign()
 	token = getNextToken();
 	if (token.type != "DIVIDER" || (token.value != "+" && token.value != "-" && token.value != "/" && token.value != "*"))
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
+	fillValueOfThisNodeWithSign->name = token.value;
 }
 
-void SyntaxParser::operand()
+void SyntaxParser::operand(int indexParentNode)
 {
 	printInDebugMode("operand");
 
@@ -546,29 +715,42 @@ void SyntaxParser::operand()
 	Token token;
 
 	int savedNumToken = numCurrentToken;
+	int indexSavedTree = numLastSavedTree;
+
+	saveTree();
 	try {
-		function();
+		ElementOfTree* node = new ElementOfTree(tree.getAmountElements(), "function");
+		tree.addElementInTree(node, indexParentNode);
+		function(tree.getAmountElements() - 1);
 		return;
 	}
-	catch (SyntaxError&) {}
+	catch (SyntaxError&) {
+		loadSavedTreeWithIndex(indexSavedTree);
+	}
 
 	numCurrentToken = savedNumToken;
 	try {
 	token = getNextToken();
 	if (token.type != "IDENTIFIER")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
+	ElementOfTree* node = new ElementOfTree(tree.getAmountElements(), token.value);
+	tree.addElementInTree(node, indexParentNode);
 	return;
 	}
-	catch (SyntaxError&) {}
+	catch (SyntaxError&) {
+		loadSavedTreeWithIndex(indexSavedTree);
+	}
 
 	numCurrentToken = savedNumToken;
 	token = getNextToken();
 	if (token.type != "CONSTANT")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
+	ElementOfTree* node = new ElementOfTree(tree.getAmountElements(), token.value);
+	tree.addElementInTree(node, indexParentNode);
 	return;
 }
 
-void SyntaxParser::function()
+void SyntaxParser::function(int indexParentNode)
 {
 	printInDebugMode("function");
 
@@ -576,10 +758,19 @@ void SyntaxParser::function()
 	Token token;
 
 	int savedNumToken = numCurrentToken;
+	int indexSavedTree = numLastSavedTree;
+
+	saveTree();
+
 	try {
 		token = getNextToken();
 		if (token.type != "IDENTIFIER")
 			throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
+		ElementOfTree* node = new ElementOfTree(tree.getAmountElements(), token.value);
+		tree.addElementInTree(node, indexParentNode);
+
+		node = new ElementOfTree(tree.getAmountElements(), "args");
+		tree.addElementInTree(node, indexParentNode);
 		token = getNextToken();
 		if (token.type != "DIVIDER" || token.value != "(")
 			throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
@@ -589,24 +780,31 @@ void SyntaxParser::function()
 
 		return;
 	}
-	catch (SyntaxError&) {}
+	catch (SyntaxError&) {
+		loadSavedTreeWithIndex(indexSavedTree);
+	}
 
 	numCurrentToken = savedNumToken;
 	token = getNextToken();
 	if (token.type != "IDENTIFIER")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
+	ElementOfTree* node = new ElementOfTree(tree.getAmountElements(), token.value);
+	tree.addElementInTree(node, indexParentNode);
+
 	token = getNextToken();
 	if (token.type != "DIVIDER" || token.value != "(")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 
-	functionArguments();
+	node = new ElementOfTree(tree.getAmountElements(), "args");
+	tree.addElementInTree(node, indexParentNode);
+	functionArguments(tree.getAmountElements() - 1);
 
 	token = getNextToken();
 	if (token.type != "DIVIDER" || token.value != ")")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 }
 
-void SyntaxParser::functionArguments()
+void SyntaxParser::functionArguments(int indexParentNode)
 {
 	printInDebugMode("functionArguments");
 
@@ -614,20 +812,27 @@ void SyntaxParser::functionArguments()
 	Token token;
 
 	int savedNumToken = numCurrentToken;
+	int indexSavedTree = numLastSavedTree;
+
+	saveTree();
+
 	try {
-		value();
+		value(indexParentNode);
 		return;
 	}
-	catch (SyntaxError&) {}
+	catch (SyntaxError&) {
+		loadSavedTreeWithIndex(indexSavedTree);
+	}
 
 	numCurrentToken = savedNumToken;
-	value();
-	if (token.type != "DEVIDER" || token.value != ",")
+	//TODO change
+	value(indexParentNode);
+	if (token.type != "DIVIDER" || token.value != ",")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
-	functionArguments();
+	functionArguments(indexParentNode);
 }
 
-void SyntaxParser::conditionsSequence()
+void SyntaxParser::conditionsSequence(int indexParentNode)
 {
 	printInDebugMode("conditionsSequence");
 
@@ -635,16 +840,27 @@ void SyntaxParser::conditionsSequence()
 	Token token;
 
 	int savedNumToken = numCurrentToken;
+	int indexSavedTree = numLastSavedTree;
+
+	saveTree();
+
 	try {
-		condition();
+		condition(indexParentNode);
 		return;
 	}
-	catch (SyntaxError&) {}
+	catch (SyntaxError&) {
+		loadSavedTreeWithIndex(indexSavedTree);
+	}
 
 	numCurrentToken = savedNumToken;
-	condition();
-	logicalOperators();
-	conditionsSequence();
+	
+	int indexOperatorNode = tree.getAmountElements();
+	ElementOfTree* operatorNode = new ElementOfTree(indexOperatorNode, token.value);
+	tree.addElementInTree(operatorNode, indexParentNode);
+
+	condition(indexOperatorNode);
+	logicalOperators(operatorNode);
+	conditionsSequence(indexOperatorNode);
 }
 
 void SyntaxParser::printInDebugMode(const char* msg) {

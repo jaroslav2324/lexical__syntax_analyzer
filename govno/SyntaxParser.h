@@ -35,33 +35,40 @@ private:
 
 	Tree tree;
 
+	vector<Tree> listSavedTrees;
+	int numLastSavedTree = -1;
+	void saveTree();
+	void loadSavedTreeWithIndex(int index);
+
 	void throwError(char* errorMessage, int line, int position);
 	void throwError(string& errorMessage, int line, int position);
 
 	void printInDebugMode(const char* msg);
 
 	// Non-terminal symbol functions
-	void S();
-	void mainProgram();
-	void operatorsSequence(bool recursiveCall);
-	void functionsDefinition();
-	void functionDefinition();
-	void type();
-	void passedParameters();
-	void value();
-	void parameter();
-	void condition();
-	void logicalOperators();
-	void comparison();
-	void conditionOperator();
-	void cycle();
-	void _bool(); // bool
-	void definition();
-	void assignment();
-	void arythmeticalExpression(bool recursiveCall);
-	void sign();
-	void operand();
-	void function();
-	void functionArguments();
-	void conditionsSequence();
+	void S(int indexParentNode);
+	void mainProgram(int indexParentNode);
+	void operatorsSequence(int indexParentNode);
+	void functionsDefinition(int indexParentNode);
+	void functionDefinition(int indexParentNode);
+	void type(int indexParentNode);
+	void passedParameters(int indexParentNode);
+	void value(int indexParentNode);
+	void parameter(int indexParentNode);
+	void condition(int indexParentNode);
+	void logicalOperators(ElementOfTree* fillThisNodeWithName);
+	void comparison(ElementOfTree* fillValueOfThisNodeWithSign);
+	void conditionOperator(int indexParentNode);
+	void cycle(int indexParentNode);
+	void _bool(int indexParentNode); // bool
+	void definition(int indexParentNode);
+	void assignment(int indexParentNode);
+	void arythmeticalExpression(int indexParentNode);
+	void sign(ElementOfTree* fillValueOfThisNodeWithSign);
+	void operand(int indexParentNode);
+	void function(int indexParentNode);
+	// does not work with multiple arguments
+	void functionArguments(int indexParentNode);
+	// does not work with multiple conditions
+	void conditionsSequence(int indexParentNode);
 };
