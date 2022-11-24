@@ -4,12 +4,37 @@ void SyntaxParser::parseTokens(vector<Token> listOfTockens)
 {
 	SyntaxParser::listOfTokens = listOfTockens;
 
-	S();
+	try {
+		S();
+	}
+	catch (MultipleDefinitionError& err) {
+		err.printMessage();
+	}
+		
 }
 
 void SyntaxParser::printTree()
 {
-	cout << "TODO print tree";
+	tree.printTree();
+}
+
+void SyntaxParser::addIdToIdTable(Token typeToken, Token idToken)
+{
+	for (auto& typeIdPair: identifiersTable)
+		if (typeIdPair.first == typeToken.value && typeIdPair.second == idToken.value) {
+			string errorMsg = "This identifier was already defined";
+			throw MultipleDefinitionError(errorMsg, idToken.pos[0], idToken.pos[1]);
+		}
+	identifiersTable.push_back(std::make_pair(typeToken.value, idToken.value));
+}
+
+void SyntaxParser::printIdentifiersTable()
+{
+	int counter = 0;
+	for (auto& typeIdPair : identifiersTable) {
+		cout << counter << "      " << typeIdPair.first << "    " << typeIdPair.second << endl;
+		counter++;
+	}
 }
 
 Token SyntaxParser::getNextToken()
@@ -73,86 +98,73 @@ void SyntaxParser::mainProgram()
 	token = getNextToken();
 	if (token.type != "DIVIDER" || token.value != "{")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
-	operatorsSequence();
+	operatorsSequence(false);
 	token = getNextToken();
 	if (token.type != "DIVIDER" || token.value != "}")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 }
 
-void SyntaxParser::operatorsSequence()
+void SyntaxParser::operatorsSequence(bool recursiveCall)
 {
 	printInDebugMode("operatorsSequence");
 
+	bool flag_convolution_worked_on_something = false;
 	int savedNumToken = numCurrentToken;
+
 	try {
 		assignment();
-		operatorsSequence();
-		return;
-	}
-	catch (SyntaxError&) {}
-
-	numCurrentToken = savedNumToken;
-	try {
-		definition();
-		operatorsSequence();
-		return;
-	}
-	catch (SyntaxError&) {}
-
-	numCurrentToken = savedNumToken;
-	try {
-		function();
-		operatorsSequence();
-		return;
-	}
-	catch (SyntaxError&) {}
-
-	numCurrentToken = savedNumToken;
-	try {
-		conditionOperator();
-		operatorsSequence();
-		return;
-	}
-	catch (SyntaxError&) {}
-
-	numCurrentToken = savedNumToken;
-	try {
-		cycle();
-		operatorsSequence();
-		return;
-	}
-	catch (SyntaxError&) {}
-
-	numCurrentToken = savedNumToken;
-	try {
-		assignment();
-		return;
-	}
-	catch (SyntaxError&) {}
-
-	numCurrentToken = savedNumToken;
-	try {
-		definition();
-		return;
-	}
-	catch (SyntaxError&) {}
-
-	numCurrentToken = savedNumToken;
-	try {
-		function();
-		return;
-	}
-	catch (SyntaxError&) {}
-
-	numCurrentToken = savedNumToken;
-	try {
-		conditionOperator();
-		return;
+		flag_convolution_worked_on_something = true;
+		savedNumToken = numCurrentToken;
 	}
 	catch (SyntaxError&) {
 		numCurrentToken = savedNumToken;
-		cycle();
 	}
+
+	try {
+		definition();
+		flag_convolution_worked_on_something = true;
+		savedNumToken = numCurrentToken;
+	}
+	catch (SyntaxError&) {
+		numCurrentToken = savedNumToken;
+	}
+
+	try {
+		function();
+		flag_convolution_worked_on_something = true;
+		savedNumToken = numCurrentToken;
+	}
+	catch (SyntaxError&) {
+		numCurrentToken = savedNumToken;
+	}
+
+	try {
+		conditionOperator();
+		flag_convolution_worked_on_something = true;
+		savedNumToken = numCurrentToken;
+	}
+	catch (SyntaxError&) {
+		numCurrentToken = savedNumToken;
+	}
+
+	try {
+		cycle();
+		flag_convolution_worked_on_something = true;
+		savedNumToken = numCurrentToken;
+	}
+	catch (SyntaxError&) {
+		numCurrentToken = savedNumToken;
+	}
+
+	//TODO change
+	if (flag_convolution_worked_on_something == false)
+		throw SyntaxError("error in operators sequence", -1, -1);
+
+	try
+	{
+		operatorsSequence(true);
+	}
+	catch (SyntaxError&){}
 	
 }
 
@@ -187,20 +199,23 @@ void SyntaxParser::functionDefinition()
 	token = getNextToken();
 	if (token.type != "IDENTIFIER")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
+
+	addIdToIdTable(listOfTokens[numCurrentToken - 2], token);
+
 	token = getNextToken();
-	if (token.type != "DEVIDER" || token.value != "(")
+	if (token.type != "DIVIDER" || token.value != "(")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 
 	passedParameters();
 
 	token = getNextToken();
-	if (token.type != "DEVIDER" || token.value != ")")
+	if (token.type != "DIVIDER" || token.value != ")")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 	token = getNextToken();
-	if (token.type != "DEVIDER" || token.value != "{")
+	if (token.type != "DIVIDER" || token.value != "{")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 
-	operatorsSequence();
+	operatorsSequence(false);
 
 	token = getNextToken();
 	if (token.type != "KEYWORD" || token.value != "return")
@@ -209,7 +224,11 @@ void SyntaxParser::functionDefinition()
 	value();
 
 	token = getNextToken();
-	if (token.type != "DEVIDER" || token.value != "}")
+	if (token.type != "DIVIDER" || token.value != ";")
+		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
+
+	token = getNextToken();
+	if (token.type != "DIVIDER" || token.value != "}")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 
 }
@@ -221,6 +240,7 @@ void SyntaxParser::type()
 	std::string errorMessage("No such type");
 	Token token;
 
+	token = getNextToken();
 	if (token.type != "KEYWORD" || (token.value != "bool" && token.value != "integer" && token.value != "string"))
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 
@@ -264,14 +284,29 @@ void SyntaxParser::value()
 
 	numCurrentToken = savedNumToken;
 	try {
-		arythmeticalExpression();
+		arythmeticalExpression(false);
+		return;
+	}
+	catch (SyntaxError&) {}
+
+	try {
+		numCurrentToken = savedNumToken;
+		token = getNextToken();
+		if (token.type != "IDENTIFIER" && token.type != "CONSTANT" && (token.type != "KEYWORD" || (token.value != "true" && token.value != "false")))
+			throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 		return;
 	}
 	catch (SyntaxError&) {}
 
 	numCurrentToken = savedNumToken;
 	token = getNextToken();
-	if (token.type != "CONSTANT" || token.type != "IDENTIFIER")
+	if (token.type != "DIVIDER" || token.value != "\"")
+		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
+	token = getNextToken();
+	if (token.type != "CONSTANT" && token.type != "KEYWORD")
+		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
+	token = getNextToken();
+	if (token.type != "DIVIDER" || token.value != "\"")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 }
 
@@ -347,7 +382,7 @@ void SyntaxParser::comparison()
 	Token token;
 
 	token = getNextToken();
-	if (token.type != "DEVIDER" || (token.value != "==" && token.value != "!=" && token.value != "<"
+	if (token.type != "DIVIDER" || (token.value != "==" && token.value != "!=" && token.value != "<"
 		&& token.value != ">" && token.value != "<=" && token.value != ">="))
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 }
@@ -369,20 +404,20 @@ void SyntaxParser::conditionOperator()
 	if (token.type != "KEYWORD" || token.value != "then")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 
-	operatorsSequence();
+	operatorsSequence(false);
 
 	token = getNextToken();
 	if (token.type != "KEYWORD" || token.value != "else")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 
-	operatorsSequence();
+	operatorsSequence(false);
 
 	token = getNextToken();
 	if (token.type != "KEYWORD" || token.value != "endif")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 
 	token = getNextToken();
-	if (token.type != "DEVIDER" || token.value != ";")
+	if (token.type != "DIVIDER" || token.value != ";")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 }
 
@@ -400,17 +435,17 @@ void SyntaxParser::cycle()
 	conditionsSequence();
 
 	token = getNextToken();
-	if (token.type != "DEVIDER" || token.value != ";")
+	if (token.type != "DIVIDER" || token.value != ";")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 
-	operatorsSequence();
+	operatorsSequence(false);
 
 	token = getNextToken();
 	if (token.type != "KEYWORD" || token.value != "endwhile")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 
 	token = getNextToken();
-	if (token.type != "DEVIDER" || token.value != ";")
+	if (token.type != "DIVIDER" || token.value != ";")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 }
 
@@ -439,8 +474,10 @@ void SyntaxParser::definition()
 	if (token.type != "IDENTIFIER")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 
+	addIdToIdTable(listOfTokens[numCurrentToken - 1], token);
+
 	token = getNextToken();
-	if (token.type != "DEVIDER" || token.value != ";")
+	if (token.type != "DIVIDER" || token.value != ";")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 }
 
@@ -456,55 +493,37 @@ void SyntaxParser::assignment()
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 
 	token = getNextToken();
-	if (token.type != "DEVIDER" || token.value != "=")
+	if (token.type != "DIVIDER" || token.value != "=")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 
 	value();
 
 	token = getNextToken();
-	if (token.type != "DEVIDER" || token.value != ";")
+	if (token.type != "DIVIDER" || token.value != ";")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 }
 
-void SyntaxParser::arythmeticalExpression()
+void SyntaxParser::arythmeticalExpression(bool recursiveCall)
 {
 	printInDebugMode("arythmeticalExpression");
+	bool flag_recursive_error = false;
 
 	std::string errorMessage("Wrong arythmetical expression");
 	Token token;
-
+	
 	int savedNumToken = numCurrentToken;
-	try {
+	try{
 		operand();
 		sign();
-		operand();
+		arythmeticalExpression(true);
 		return;
 	}
-	catch (SyntaxError&) {}
-
-	numCurrentToken = savedNumToken;
-	try {
-		operand();
-		sign();
-		arythmeticalExpression();
-		return;
-	}
-	catch (SyntaxError&) {}
+	catch (SyntaxError& err){}
 
 	numCurrentToken = savedNumToken;
 	operand();
 	sign();
-
-	token = getNextToken();
-	if (token.type != "DEVIDER" || token.value != "(")
-		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
-
-	arythmeticalExpression();
-
-	token = getNextToken();
-	if (token.type != "DEVIDER" || token.value != ")")
-		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
-
+	operand();
 }
 
 void SyntaxParser::sign()
@@ -515,7 +534,7 @@ void SyntaxParser::sign()
 	Token token;
 
 	token = getNextToken();
-	if (token.type != "DEVIDER" || (token.value != "+" && token.value != "-" && token.value != "/" && token.value != "*"))
+	if (token.type != "DIVIDER" || (token.value != "+" && token.value != "-" && token.value != "/" && token.value != "*"))
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 }
 
@@ -528,17 +547,17 @@ void SyntaxParser::operand()
 
 	int savedNumToken = numCurrentToken;
 	try {
-	token = getNextToken();
-	if (token.type != "IDENTIFIER")
-		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
+		function();
 		return;
 	}
 	catch (SyntaxError&) {}
 
 	numCurrentToken = savedNumToken;
 	try {
-		function();
-		return;
+	token = getNextToken();
+	if (token.type != "IDENTIFIER")
+		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
+	return;
 	}
 	catch (SyntaxError&) {}
 
@@ -562,13 +581,10 @@ void SyntaxParser::function()
 		if (token.type != "IDENTIFIER")
 			throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 		token = getNextToken();
-		if (token.type != "DEVIDER" || token.value != "(")
+		if (token.type != "DIVIDER" || token.value != "(")
 			throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 		token = getNextToken();
-		if (token.type != "DEVIDER" || token.value != ")")
-			throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
-		token = getNextToken();
-		if (token.type != "DEVIDER" || token.value != ";")
+		if (token.type != "DIVIDER" || token.value != ")")
 			throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 
 		return;
@@ -580,16 +596,13 @@ void SyntaxParser::function()
 	if (token.type != "IDENTIFIER")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 	token = getNextToken();
-	if (token.type != "DEVIDER" || token.value != "(")
+	if (token.type != "DIVIDER" || token.value != "(")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 
 	functionArguments();
 
 	token = getNextToken();
-	if (token.type != "DEVIDER" || token.value != ")")
-		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
-	token = getNextToken();
-	if (token.type != "DEVIDER" || token.value != ";")
+	if (token.type != "DIVIDER" || token.value != ")")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 }
 

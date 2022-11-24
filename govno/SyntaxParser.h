@@ -7,6 +7,8 @@
 #include "settings.h"
 #include "Token.h"
 #include "SyntaxError.h"
+#include "MultipleDefinitionError.h"
+#include "Tree.h"
 
 using std::cout;
 using std::endl;
@@ -17,19 +19,21 @@ public:
 	//TODO Must return tree and identifier table
 	void parseTokens(vector<Token> listOfTockens);
 	void printTree();
-
-	// getTree
-	// get IdentifierTable
+	void printIdentifiersTable();
 
 private:
 
 	vector<Token> listOfTokens;
 
+	// <type, id>
+	vector<std::pair<string, string>> identifiersTable;
+
+	void addIdToIdTable(Token type, Token id);
+
 	int numCurrentToken = -1;
 	Token getNextToken();
 
-	// syntax tree
-	// IdentifierTable
+	Tree tree;
 
 	void throwError(char* errorMessage, int line, int position);
 	void throwError(string& errorMessage, int line, int position);
@@ -39,7 +43,7 @@ private:
 	// Non-terminal symbol functions
 	void S();
 	void mainProgram();
-	void operatorsSequence();
+	void operatorsSequence(bool recursiveCall);
 	void functionsDefinition();
 	void functionDefinition();
 	void type();
@@ -54,7 +58,7 @@ private:
 	void _bool(); // bool
 	void definition();
 	void assignment();
-	void arythmeticalExpression();
+	void arythmeticalExpression(bool recursiveCall);
 	void sign();
 	void operand();
 	void function();

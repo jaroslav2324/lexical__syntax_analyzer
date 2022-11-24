@@ -142,21 +142,25 @@
   <ItemGroup>
     <ClInclude Include="DividerReader.h" />
     <ClInclude Include="KeywordReader.h" />
+    <ClInclude Include="MultipleDefinitionError.h" />
     <ClInclude Include="Parser.h" />
     <ClInclude Include="ProgramReader.h" />
     <ClInclude Include="settings.h" />
     <ClInclude Include="SyntaxError.h" />
     <ClInclude Include="SyntaxParser.h" />
     <ClInclude Include="Token.h" />
+    <ClInclude Include="Tree.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DividerReader.cpp" />
     <ClCompile Include="KeywordReader.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MultipleDefinitionError.cpp" />
     <ClCompile Include="Parser.cpp" />
     <ClCompile Include="ProgramReader.cpp" />
     <ClCompile Include="SyntaxError.cpp" />
     <ClCompile Include="SyntaxParser.cpp" />
+    <ClCompile Include="Tree.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,7 +1,18 @@
 #pragma once
 #include "ElementOfTree.h"
 #include <queue>
+#include <iostream>
 
+class ElementOfTree {
+public:
+	ElementOfTree() {}
+
+	ElementOfTree(std::string id) : id(id) {}
+
+	std::string id{};
+
+	std::vector<ElementOfTree*> sons;
+};
 
 class Tree {
 private:
