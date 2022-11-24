@@ -3,18 +3,6 @@
 #include <queue>
 #include <iostream>
 
-class ElementOfTree {
-public:
-	ElementOfTree() {}
-
-	ElementOfTree(int id, std::string name) : id(id), name(name) {}
-
-	int id{};
-	std::string name;
-
-	std::vector<ElementOfTree*> sons;
-};
-
 class Tree {
 private:
 	ElementOfTree* root;

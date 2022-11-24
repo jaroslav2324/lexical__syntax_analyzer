@@ -1,8 +1,8 @@
 #include "ElementOfTree.h"
 
-ElementOfTree::ElementOfTree() {}
+//ElementOfTree::ElementOfTree() {}
 
-ElementOfTree::ElementOfTree(std::string id) : id(id) {}
+//ElementOfTree::ElementOfTree(int id, std::string name) : id(id), name(name) {}
 
 ElementOfTree::~ElementOfTree() {
 	std::cout << "Destructor of " << id << "!\n";

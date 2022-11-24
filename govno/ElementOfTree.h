@@ -4,13 +4,12 @@
 
 class ElementOfTree {
 public:
-	ElementOfTree();
-
+	ElementOfTree() {}
+	ElementOfTree(int id, std::string name) : id(id), name(name) {}
 	~ElementOfTree();
 
-	ElementOfTree(std::string id);
-
-	std::string id{};
+	int id{};
+	std::string name;
 
 	std::vector<ElementOfTree*> sons;
 };

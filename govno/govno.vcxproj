@@ -141,6 +141,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="DividerReader.h" />
+    <ClInclude Include="ElementOfTree.h" />
     <ClInclude Include="KeywordReader.h" />
     <ClInclude Include="MultipleDefinitionError.h" />
     <ClInclude Include="Parser.h" />
@@ -153,6 +154,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DividerReader.cpp" />
+    <ClCompile Include="ElementOfTree.cpp" />
     <ClCompile Include="KeywordReader.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MultipleDefinitionError.cpp" />
