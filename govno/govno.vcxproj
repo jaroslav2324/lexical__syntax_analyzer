@@ -153,6 +153,7 @@
     <ClInclude Include="DividerReader.h" />
     <ClInclude Include="ElementOfTree.h" />
     <ClInclude Include="KeywordReader.h" />
+    <ClInclude Include="MissedSemicolonError.h" />
     <ClInclude Include="MultipleDefinitionError.h" />
     <ClInclude Include="Parser.h" />
     <ClInclude Include="ProgramReader.h" />
@@ -167,6 +168,7 @@
     <ClCompile Include="ElementOfTree.cpp" />
     <ClCompile Include="KeywordReader.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MissedSemicolonError.cpp" />
     <ClCompile Include="MultipleDefinitionError.cpp" />
     <ClCompile Include="Parser.cpp" />
     <ClCompile Include="ProgramReader.cpp" />

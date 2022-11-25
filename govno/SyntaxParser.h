@@ -9,6 +9,7 @@
 #include "Token.h"
 #include "SyntaxError.h"
 #include "MultipleDefinitionError.h"
+#include "MissedSemicolonError.h"
 #include "Tree.h"
 
 using std::cout;
@@ -47,8 +48,8 @@ private:
 
 	void deleteListSavedTrees();
 
-	void throwError(char* errorMessage, int line, int position);
-	void throwError(string& errorMessage, int line, int position);
+	void throwSyntaxError(char* errorMessage, int line, int position);
+	void throwSyntaxError(string& errorMessage, int line, int position);
 
 	void printInDebugMode(const char* msg);
 	void printTreeInDebug();

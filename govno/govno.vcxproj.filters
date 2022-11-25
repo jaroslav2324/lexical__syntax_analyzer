@@ -45,6 +45,9 @@
     <ClCompile Include="ElementOfTree.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="MissedSemicolonError.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="KeywordReader.h">
@@ -78,6 +81,9 @@
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="ElementOfTree.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="MissedSemicolonError.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

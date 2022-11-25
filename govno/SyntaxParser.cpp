@@ -16,6 +16,9 @@ void SyntaxParser::parseTokens(vector<Token> listOfTockens)
 
 	try {
 		S(0);
+		if (numCurrentToken != listOfTockens.size() - 1)
+			throw SyntaxError("main is ok, error in functions definition", -1, -1);
+
 		printTree();
 		printIdentifiersTable();
 	}
@@ -23,6 +26,9 @@ void SyntaxParser::parseTokens(vector<Token> listOfTockens)
 		err.printMessage();
 	}
 	catch (SyntaxError& err) {
+		err.printMessage();
+	}
+	catch (MissedSemicolonError& err) {
 		err.printMessage();
 	}
 	deleteListSavedTrees();
@@ -103,13 +109,13 @@ void SyntaxParser::deleteListSavedTrees()
 	}
 }
 
-void SyntaxParser::throwError(char* errorMessage, int line, int position)
+void SyntaxParser::throwSyntaxError(char* errorMessage, int line, int position)
 {
 	std::string message(errorMessage);
-	throwError(message, line, position);
+	throwSyntaxError(message, line, position);
 }
 
-void SyntaxParser::throwError(string& errorMessage, int line, int position)
+void SyntaxParser::throwSyntaxError(string& errorMessage, int line, int position)
 {
 	throw SyntaxError(errorMessage, line, position);
 }
@@ -349,8 +355,10 @@ void SyntaxParser::functionDefinition(int indexParentNode)
 	value(tree->getAmountElements() - 1);
 
 	token = getNextToken();
-	if (token.type != "DIVIDER" || token.value != ";")
-		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
+	if (token.type != "DIVIDER" || token.value != ";") {
+		Token prevToken = listOfTokens[numCurrentToken - 1];
+		throw MissedSemicolonError(prevToken.pos[1], prevToken.pos[0]);
+	}
 
 	token = getNextToken();
 	if (token.type != "DIVIDER" || token.value != "}")
@@ -672,8 +680,10 @@ void SyntaxParser::definition(int indexParentNode)
 
 
 	token = getNextToken();
-	if (token.type != "DIVIDER" || token.value != ";")
-		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
+	if (token.type != "DIVIDER" || token.value != ";") {
+		Token prevToken = listOfTokens[numCurrentToken - 1];
+		throw MissedSemicolonError(prevToken.pos[1], prevToken.pos[0]);
+	}
 
 	addIdToIdTable(listOfTokens[numCurrentToken - 2], listOfTokens[numCurrentToken - 1]);
 
@@ -699,8 +709,10 @@ void SyntaxParser::assignment(int indexParentNode)
 	value(indexParentNode);
 
 	token = getNextToken();
-	if (token.type != "DIVIDER" || token.value != ";")
-		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
+	if (token.type != "DIVIDER" || token.value != ";") {
+		Token prevToken = listOfTokens[numCurrentToken - 1];
+		throw MissedSemicolonError(prevToken.pos[1], prevToken.pos[0]);
+	}
 }
 
 void SyntaxParser::arythmeticalExpression(int indexParentNode)
