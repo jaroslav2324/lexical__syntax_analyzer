@@ -119,8 +119,8 @@ void SyntaxParser::S(int indexParentNode)
 	printInDebugMode("S");
 
 	int savedNumToken = numCurrentToken;
-	int indexSavedTree = numLastSavedTree;
 	saveTreeAndIdTable();
+	int indexSavedTree = numLastSavedTree;
 	try {
 		ElementOfTree* node = new ElementOfTree(tree->getAmountElements(), "program");
 		tree->addElementInTree(node, indexParentNode);
@@ -129,7 +129,7 @@ void SyntaxParser::S(int indexParentNode)
 		return;
 	}
 	catch (SyntaxError&) {
-		loadTreeAndIdTableWithIndex(numLastSavedTree);
+		loadTreeAndIdTableWithIndex(indexSavedTree);
 	}
 
 	numCurrentToken = savedNumToken;
