@@ -16,10 +16,16 @@ void SyntaxParser::parseTokens(vector<Token> listOfTockens)
 
 	try {
 		S(0);
+		printTree();
+		printIdentifiersTable();
 	}
 	catch (MultipleDefinitionError& err) {
 		err.printMessage();
 	}
+	catch (SyntaxError& err) {
+		err.printMessage();
+	}
+	deleteListSavedTrees();
 		
 }
 
@@ -31,7 +37,7 @@ void SyntaxParser::addIdToIdTable(Token typeToken, Token idToken)
 {
 	for (auto& typeIdPair: identifiersTable)
 		if (typeIdPair.first == typeToken.value && typeIdPair.second == idToken.value) {
-			string errorMsg = "This identifier was already defined";
+			string errorMsg = "This identifier >> " + typeToken.value + " " + idToken.value + " << was already defined";
 			throw MultipleDefinitionError(errorMsg, idToken.pos[0], idToken.pos[1]);
 		}
 	identifiersTable.push_back(std::make_pair(typeToken.value, idToken.value));
@@ -40,10 +46,17 @@ void SyntaxParser::addIdToIdTable(Token typeToken, Token idToken)
 void SyntaxParser::printIdentifiersTable()
 {
 	int counter = 0;
+	cout << endl;
+	cout << "==TABLE OF IDENTIFICATORS==" << endl;
+	cout << "---------------------------" << endl;
+	cout << "NUM |" << setw(8) << "TYPE" << " | " << setw(9) << "NAME" << " |" << endl;
+	cout << "---------------------------" << endl;
 	for (auto& typeIdPair : identifiersTable) {
-		cout << counter << "      " << typeIdPair.first << "    " << typeIdPair.second << endl;
+		cout << setw(3) << counter << " | " << setw(7) << typeIdPair.first << " | " << setw(9) << typeIdPair.second << " |" << endl;
 		counter++;
 	}
+	cout << "---------------------------" << endl;
+	cout << endl;
 }
 
 Token SyntaxParser::getNextToken()
@@ -54,14 +67,16 @@ Token SyntaxParser::getNextToken()
 	return listOfTokens[numCurrentToken];
 }
 
-void SyntaxParser::saveTree()
+void SyntaxParser::saveTreeAndIdTable()
 {
 	Tree* tr = new Tree(*tree);
 	listSavedTrees.push_back(tr);
 	numLastSavedTree++;
+
+	listSavedIdTables.push_back(identifiersTable);
 }
 
-void SyntaxParser::loadSavedTreeWithIndex(int index)
+void SyntaxParser::loadTreeAndIdTableWithIndex(int index)
 {
 	Tree* tr;
 	for (int i = listSavedTrees.size() - 1; i > index; i--) {
@@ -69,8 +84,23 @@ void SyntaxParser::loadSavedTreeWithIndex(int index)
 		listSavedTrees.pop_back();
 		numLastSavedTree--;
 	}
+
+	for (int i = listSavedIdTables.size() - 1; i > index; i--) {
+		listSavedIdTables.pop_back();
+	}
+
 	delete tree;
 	tree = new Tree(*listSavedTrees[index]);
+	identifiersTable = listSavedIdTables[index];
+}
+
+void SyntaxParser::deleteListSavedTrees()
+{
+	int lastIndex = listSavedTrees.size();
+	for (int i = lastIndex - 1; i >= 0; i--) {
+		delete listSavedTrees[i];
+		listSavedTrees.pop_back();
+	}
 }
 
 void SyntaxParser::throwError(char* errorMessage, int line, int position)
@@ -90,7 +120,7 @@ void SyntaxParser::S(int indexParentNode)
 
 	int savedNumToken = numCurrentToken;
 	int indexSavedTree = numLastSavedTree;
-	saveTree();
+	saveTreeAndIdTable();
 	try {
 		ElementOfTree* node = new ElementOfTree(tree->getAmountElements(), "program");
 		tree->addElementInTree(node, indexParentNode);
@@ -99,7 +129,7 @@ void SyntaxParser::S(int indexParentNode)
 		return;
 	}
 	catch (SyntaxError&) {
-		loadSavedTreeWithIndex(numLastSavedTree);
+		loadTreeAndIdTableWithIndex(numLastSavedTree);
 	}
 
 	numCurrentToken = savedNumToken;
@@ -148,7 +178,7 @@ void SyntaxParser::operatorsSequence(int indexParentNode)
 	int savedNumToken = numCurrentToken;
 	int indexSavedTree;
 
-	saveTree();
+	saveTreeAndIdTable();
 	indexSavedTree = numLastSavedTree;
 	try {
 		ElementOfTree* node = new ElementOfTree(tree->getAmountElements(), "assignment");
@@ -157,12 +187,12 @@ void SyntaxParser::operatorsSequence(int indexParentNode)
 
 		flag_convolution_worked_on_something = true;
 		savedNumToken = numCurrentToken;
-		saveTree();
+		saveTreeAndIdTable();
 		indexSavedTree = numLastSavedTree;
 	}
 	catch (SyntaxError&) {
 		numCurrentToken = savedNumToken;
-		loadSavedTreeWithIndex(indexSavedTree);
+		loadTreeAndIdTableWithIndex(indexSavedTree);
 	}
 	printTreeInDebug();
 
@@ -173,12 +203,12 @@ void SyntaxParser::operatorsSequence(int indexParentNode)
 
 		flag_convolution_worked_on_something = true;
 		savedNumToken = numCurrentToken;
-		saveTree();
+		saveTreeAndIdTable();
 		indexSavedTree = numLastSavedTree;
 	}
 	catch (SyntaxError&) {
 		numCurrentToken = savedNumToken;
-		loadSavedTreeWithIndex(indexSavedTree);
+		loadTreeAndIdTableWithIndex(indexSavedTree);
 	}
 	printTreeInDebug();
 
@@ -189,12 +219,12 @@ void SyntaxParser::operatorsSequence(int indexParentNode)
 
 		flag_convolution_worked_on_something = true;
 		savedNumToken = numCurrentToken;
-		saveTree();
+		saveTreeAndIdTable();
 		indexSavedTree = numLastSavedTree;
 	}
 	catch (SyntaxError&) {
 		numCurrentToken = savedNumToken;
-		loadSavedTreeWithIndex(indexSavedTree);
+		loadTreeAndIdTableWithIndex(indexSavedTree);
 	}
 	printTreeInDebug();
 
@@ -205,12 +235,12 @@ void SyntaxParser::operatorsSequence(int indexParentNode)
 
 		flag_convolution_worked_on_something = true;
 		savedNumToken = numCurrentToken;
-		saveTree();
+		saveTreeAndIdTable();
 		indexSavedTree = numLastSavedTree;
 	}
 	catch (SyntaxError&) {
 		numCurrentToken = savedNumToken;
-		loadSavedTreeWithIndex(indexSavedTree);
+		loadTreeAndIdTableWithIndex(indexSavedTree);
 	}
 	printTreeInDebug();
 
@@ -221,12 +251,12 @@ void SyntaxParser::operatorsSequence(int indexParentNode)
 
 		flag_convolution_worked_on_something = true;
 		savedNumToken = numCurrentToken;
-		saveTree();
+		saveTreeAndIdTable();
 		indexSavedTree = numLastSavedTree;
 	}
 	catch (SyntaxError&) {
 		numCurrentToken = savedNumToken;
-		loadSavedTreeWithIndex(indexSavedTree);
+		loadTreeAndIdTableWithIndex(indexSavedTree);
 	}
 	printTreeInDebug();
 
@@ -238,7 +268,7 @@ void SyntaxParser::operatorsSequence(int indexParentNode)
 		operatorsSequence(indexParentNode);
 	}
 	catch (SyntaxError&){
-		loadSavedTreeWithIndex(indexSavedTree);
+		loadTreeAndIdTableWithIndex(indexSavedTree);
 		printTreeInDebug();
 	}
 	
@@ -249,7 +279,7 @@ void SyntaxParser::functionsDefinition(int indexParentNode)
 	printInDebugMode("functionsDefinition");
 
 	int savedNumToken = numCurrentToken;
-	saveTree();
+	saveTreeAndIdTable();
 	int indexSavedTree = numLastSavedTree;
 	try {
 		ElementOfTree* node = new ElementOfTree(tree->getAmountElements(), "function");
@@ -258,7 +288,7 @@ void SyntaxParser::functionsDefinition(int indexParentNode)
 		return;
 	}
 	catch (SyntaxError&) {
-		loadSavedTreeWithIndex(numLastSavedTree);
+		loadTreeAndIdTableWithIndex(numLastSavedTree);
 		numCurrentToken = savedNumToken;
 
 		ElementOfTree* node = new ElementOfTree(tree->getAmountElements(), "function");
@@ -352,7 +382,7 @@ void SyntaxParser::passedParameters(int indexParentNode)
 	Token token;
 
 	int savedNumToken = numCurrentToken;
-	saveTree();
+	saveTreeAndIdTable();
 	int indexSavedTree = numLastSavedTree;
 	try {
 		ElementOfTree* node = new ElementOfTree(tree->getAmountElements(), "param");
@@ -362,7 +392,7 @@ void SyntaxParser::passedParameters(int indexParentNode)
 	}
 	catch (SyntaxError&) {
 		numCurrentToken = savedNumToken;
-		loadSavedTreeWithIndex(indexSavedTree);
+		loadTreeAndIdTableWithIndex(indexSavedTree);
 
 		ElementOfTree* node = new ElementOfTree(tree->getAmountElements(), "param");
 		tree->addElementInTree(node, indexParentNode);
@@ -382,7 +412,7 @@ void SyntaxParser::value(int indexParentNode)
 	Token token;
 
 	int savedNumToken = numCurrentToken;
-	saveTree();
+	saveTreeAndIdTable();
 	int indexSavedTree = numLastSavedTree;
 
 	try {
@@ -392,7 +422,7 @@ void SyntaxParser::value(int indexParentNode)
 		return;
 	}
 	catch (SyntaxError&) {
-		loadSavedTreeWithIndex(indexSavedTree);
+		loadTreeAndIdTableWithIndex(indexSavedTree);
 	}
 
 	numCurrentToken = savedNumToken;
@@ -403,7 +433,7 @@ void SyntaxParser::value(int indexParentNode)
 		return;
 	}
 	catch (SyntaxError&) {
-		loadSavedTreeWithIndex(indexSavedTree);
+		loadTreeAndIdTableWithIndex(indexSavedTree);
 	}
 
 	try {
@@ -416,7 +446,7 @@ void SyntaxParser::value(int indexParentNode)
 		return;
 	}
 	catch (SyntaxError&) {
-		loadSavedTreeWithIndex(indexSavedTree);
+		loadTreeAndIdTableWithIndex(indexSavedTree);
 	}
 
 	numCurrentToken = savedNumToken;
@@ -453,7 +483,7 @@ void SyntaxParser::parameter(int indexParentNode)
 		tree->addElementInTree(node, indexParentNode);
 	}
 	catch (SyntaxError&) {
-		loadSavedTreeWithIndex(indexSavedTree);
+		loadTreeAndIdTableWithIndex(indexSavedTree);
 		numCurrentToken = savedNumToken;
 
 		type(indexParentNode);
@@ -468,7 +498,7 @@ void SyntaxParser::condition(int indexParentNode)
 	Token token;
 
 	int savedNumToken = numCurrentToken;
-	saveTree();
+	saveTreeAndIdTable();
 	int indexSavedTree = numLastSavedTree;
 
 	try {
@@ -487,7 +517,7 @@ void SyntaxParser::condition(int indexParentNode)
 		return;
 	}
 	catch (SyntaxError&) {
-		loadSavedTreeWithIndex(indexSavedTree);
+		loadTreeAndIdTableWithIndex(indexSavedTree);
 	}
 
 	numCurrentToken = savedNumToken;
@@ -502,7 +532,7 @@ void SyntaxParser::condition(int indexParentNode)
 		return;
 	}
 	catch (SyntaxError&) {
-		loadSavedTreeWithIndex(indexSavedTree);
+		loadTreeAndIdTableWithIndex(indexSavedTree);
 	}
 
 	numCurrentToken = savedNumToken;
@@ -589,7 +619,7 @@ void SyntaxParser::cycle(int indexParentNode)
 	if (token.type != "KEYWORD" || token.value != "while")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
 
-	ElementOfTree* node = new ElementOfTree(tree->getAmountElements(), "while");
+	ElementOfTree* node = new ElementOfTree(tree->getAmountElements(), "cond");
 	tree->addElementInTree(node, indexParentNode);
 	conditionsSequence(tree->getAmountElements() - 1);
 
@@ -640,11 +670,13 @@ void SyntaxParser::definition(int indexParentNode)
 	ElementOfTree* node = new ElementOfTree(tree->getAmountElements(), token.value);
 	tree->addElementInTree(node, indexParentNode);
 
-	addIdToIdTable(listOfTokens[numCurrentToken - 1], token);
 
 	token = getNextToken();
 	if (token.type != "DIVIDER" || token.value != ";")
 		throw SyntaxError(errorMessage, token.pos[0], token.pos[1]);
+
+	addIdToIdTable(listOfTokens[numCurrentToken - 2], listOfTokens[numCurrentToken - 1]);
+
 }
 
 void SyntaxParser::assignment(int indexParentNode)
@@ -680,7 +712,7 @@ void SyntaxParser::arythmeticalExpression(int indexParentNode)
 	Token token;
 	
 	int savedNumToken = numCurrentToken;
-	saveTree();
+	saveTreeAndIdTable();
 	int indexSavedTree = numLastSavedTree;
 
 	try{
@@ -695,7 +727,7 @@ void SyntaxParser::arythmeticalExpression(int indexParentNode)
 		return;
 	}
 	catch (SyntaxError& err){
-		loadSavedTreeWithIndex(indexSavedTree);
+		loadTreeAndIdTableWithIndex(indexSavedTree);
 	}
 
 	numCurrentToken = savedNumToken;
@@ -729,7 +761,7 @@ void SyntaxParser::operand(int indexParentNode)
 	Token token;
 
 	int savedNumToken = numCurrentToken;
-	saveTree();
+	saveTreeAndIdTable();
 	printTreeInDebug();
 	int indexSavedTree = numLastSavedTree;
 
@@ -740,7 +772,7 @@ void SyntaxParser::operand(int indexParentNode)
 		return;
 	}
 	catch (SyntaxError&) {
-		loadSavedTreeWithIndex(indexSavedTree);
+		loadTreeAndIdTableWithIndex(indexSavedTree);
 	}
 
 	numCurrentToken = savedNumToken;
@@ -753,7 +785,7 @@ void SyntaxParser::operand(int indexParentNode)
 	return;
 	}
 	catch (SyntaxError&) {
-		loadSavedTreeWithIndex(indexSavedTree);
+		loadTreeAndIdTableWithIndex(indexSavedTree);
 	}
 
 	numCurrentToken = savedNumToken;
@@ -773,7 +805,7 @@ void SyntaxParser::function(int indexParentNode)
 	Token token;
 
 	int savedNumToken = numCurrentToken;
-	saveTree();
+	saveTreeAndIdTable();
 	int indexSavedTree = numLastSavedTree;
 
 	try {
@@ -795,7 +827,7 @@ void SyntaxParser::function(int indexParentNode)
 		return;
 	}
 	catch (SyntaxError&) {
-		loadSavedTreeWithIndex(indexSavedTree);
+		loadTreeAndIdTableWithIndex(indexSavedTree);
 	}
 
 	numCurrentToken = savedNumToken;
@@ -826,7 +858,7 @@ void SyntaxParser::functionArguments(int indexParentNode)
 	Token token;
 
 	int savedNumToken = numCurrentToken;
-	saveTree();
+	saveTreeAndIdTable();
 	int indexSavedTree = numLastSavedTree;
 
 	try {
@@ -834,7 +866,7 @@ void SyntaxParser::functionArguments(int indexParentNode)
 		return;
 	}
 	catch (SyntaxError&) {
-		loadSavedTreeWithIndex(indexSavedTree);
+		loadTreeAndIdTableWithIndex(indexSavedTree);
 	}
 
 	numCurrentToken = savedNumToken;
@@ -853,7 +885,7 @@ void SyntaxParser::conditionsSequence(int indexParentNode)
 	Token token;
 
 	int savedNumToken = numCurrentToken;
-	saveTree();
+	saveTreeAndIdTable();
 	int indexSavedTree = numLastSavedTree;
 
 
@@ -863,7 +895,7 @@ void SyntaxParser::conditionsSequence(int indexParentNode)
 		return;
 	}
 	catch (SyntaxError&) {
-		loadSavedTreeWithIndex(indexSavedTree);
+		loadTreeAndIdTableWithIndex(indexSavedTree);
 	}
 
 	numCurrentToken = savedNumToken;

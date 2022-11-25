@@ -3,6 +3,7 @@
 #include <string>
 #include <set>
 #include <vector>
+#include <iomanip>
 
 #include "settings.h"
 #include "Token.h"
@@ -39,9 +40,12 @@ private:
 	Tree* tree;
 
 	vector<Tree*> listSavedTrees;
+	vector<vector<pair<string, string>>> listSavedIdTables;
 	int numLastSavedTree = -1;
-	void saveTree();
-	void loadSavedTreeWithIndex(int index);
+	void saveTreeAndIdTable();
+	void loadTreeAndIdTableWithIndex(int index);
+
+	void deleteListSavedTrees();
 
 	void throwError(char* errorMessage, int line, int position);
 	void throwError(string& errorMessage, int line, int position);
