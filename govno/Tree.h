@@ -28,7 +28,10 @@ public:
 
 	ElementOfTree* searchFromRoot(int indexOfNode);
 
+	void deleteNodeSChildren(int indexOfNode);
+
 	int getAmountElements();
+
 	void addElementInTree(ElementOfTree* node, int indexOfDesiredNode);
 	
 	void printTree();

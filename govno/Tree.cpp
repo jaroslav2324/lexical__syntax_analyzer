@@ -112,3 +112,29 @@ Tree::~Tree() {
 		std::cout << "Destructor!\n";
 	freeMemory();
 }
+
+void Tree::deleteNodeSChildren(int indexOfNode) {
+	ElementOfTree* node = searchFromRoot(indexOfNode);
+	if (node->sons.size() == 0) {
+		std::cout << "The node with id " << indexOfNode << " and name "  << node->name 
+			<< " doesnt have a children!\n";
+		return;
+	}
+
+	ElementOfTree* currentRoot = node; // от какого узла будет происходить удаление
+
+	std::queue<ElementOfTree*> queue;
+	queue.push(node);
+
+	while (!queue.empty()) {
+		node = queue.front();
+		queue.pop();
+
+		for (int i = node->sons.size() - 1; i >= 0; --i) {
+			queue.push(node->sons[i]);
+			node->sons.pop_back();
+		}
+		if (currentRoot != node) // проверка, чтобы удалить только детей выбранного узла
+			delete node;
+	}
+}
